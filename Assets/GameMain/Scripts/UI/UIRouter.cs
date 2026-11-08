@@ -1,0 +1,75 @@
+using System.Collections.Generic;
+using UnityGameFramework.Runtime;
+using UnityEngine;
+
+namespace CardRhythm.UI
+{
+    /// <summary>
+    /// 界面路由。业务代码只认 UIFormId，不关心资源路径和层级。
+    /// 维护一个“打开顺序栈”，供返回键 / Esc 使用。
+    /// 注意：GF 打开界面是异步的，Open 返回的是 serialId，界面实例可能下一帧才可用。
+    /// </summary>
+    public static class UIRouter
+    {
+        private static readonly List<int> s_OpenSerialIds = new List<int>();
+
+        public static int OpenCount
+        {
+            get { return s_OpenSerialIds.Count; }
+        }
+
+        public static int Open(UIFormId id, object userData = null, bool pauseCovered = true)
+        {
+            var uiComponent = GameEntry.GetComponent<UIComponent>();
+            if (uiComponent == null)
+            {
+                Debug.LogError("[UI] UIComponent 不存在，检查 GameFramework 对象是否在场景里。");
+                return 0;
+            }
+
+            UIFormDef def = UIFormCatalog.Get(id);
+            int serialId = uiComponent.OpenUIForm(def.AssetPath, UILayers.NameOf(def.Layer), 0, pauseCovered, userData);
+            if (serialId > 0)
+            {
+                s_OpenSerialIds.Add(serialId);
+            }
+
+            return serialId;
+        }
+
+        public static void Close(UIFormId id)
+        {
+            var uiComponent = GameEntry.GetComponent<UIComponent>();
+            if (uiComponent == null)
+            {
+                return;
+            }
+
+            UIFormDef def = UIFormCatalog.Get(id);
+            var form = uiComponent.GetUIForm(def.AssetPath);
+            if (form == null)
+            {
+                return;
+            }
+
+            s_OpenSerialIds.Remove(form.SerialId);
+            uiComponent.CloseUIForm(form);
+        }
+
+        /// <summary>关闭最近打开的一个界面（返回键）。</summary>
+        public static bool Back()
+        {
+            var uiComponent = GameEntry.GetComponent<UIComponent>();
+            if (uiComponent == null || s_OpenSerialIds.Count == 0)
+            {
+                return false;
+            }
+
+            int index = s_OpenSerialIds.Count - 1;
+            int serialId = s_OpenSerialIds[index];
+            s_OpenSerialIds.RemoveAt(index);
+            uiComponent.CloseUIForm(serialId);
+            return true;
+        }
+    }
+}
