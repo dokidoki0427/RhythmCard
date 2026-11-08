@@ -51,7 +51,7 @@
 ## Game Framework 约定
 
 - 场景入口是 `Assets/Scenes/Boot.unity`，里面放 `GameFramework` 预制体实例（22 个组件）。
-- 游戏流程继承 `ProcedureBase`，由 `ProcedureComponent` 驱动；不要用 `Update` 里手写状态机。
+- 游戏流程继承 `GameProcedureBase`（`Assets/GameMain/Scripts/Procedure/`），并注册到 `ProcedureCatalog`；改完清单必须跑 `Tools → 卡牌音游 → 流程 → 配置 Boot 场景`，否则 GF 不会加载新流程。说明见 `流程骨架.md`。
 - 资源一律走 GF 异步接口（`LoadAsset` / `LoadUIForm` / `LoadEntity`），禁止 `Resources.Load` 和直接 `Instantiate` 业务预制体。
 - UI 用 uGUI + GF `UIComponent`：界面继承 `UIFormBase`，通过 `UIFormCatalog` 注册、`UIRouter.Open/Close/Back` 打开关闭；层级见 `界面层级框架.md`。
 - 新增界面必须同步：`UIFormId` 枚举、`UIFormCatalog` 定义、`Forms/XxxForm.cs`，然后跑 `Tools → 卡牌音游 → UI → 重建占位界面`。

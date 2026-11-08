@@ -71,5 +71,22 @@ namespace CardRhythm.UI
             uiComponent.CloseUIForm(serialId);
             return true;
         }
+
+        /// <summary>关闭所有由路由打开的界面（切流程时用）。</summary>
+        public static void CloseAll()
+        {
+            var uiComponent = GameEntry.GetComponent<UIComponent>();
+            if (uiComponent == null)
+            {
+                return;
+            }
+
+            for (int i = s_OpenSerialIds.Count - 1; i >= 0; i--)
+            {
+                uiComponent.CloseUIForm(s_OpenSerialIds[i]);
+            }
+
+            s_OpenSerialIds.Clear();
+        }
     }
 }
