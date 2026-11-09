@@ -15,6 +15,7 @@ namespace CardRhythm.Rhythm
 
         private Conductor m_Conductor;
         private NoteStageView m_View;
+        private LaneAudioPlayer m_Audio;
         private float m_Bpm;
         private float m_EndTime;
 
@@ -32,6 +33,8 @@ namespace CardRhythm.Rhythm
 
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
+            m_Audio = gameObject.AddComponent<LaneAudioPlayer>();
+            m_Audio.Build();
             Judger = new Judger(Chart);
             m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger);
 
@@ -53,6 +56,7 @@ namespace CardRhythm.Rhythm
             {
                 if (Input.GetKeyDown(LaneKeys[lane]))
                 {
+                    m_Audio.Play(lane);
                     Judger.Hit(lane, songTime);
                 }
             }
