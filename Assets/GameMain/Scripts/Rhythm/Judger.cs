@@ -103,6 +103,22 @@ namespace CardRhythm.Rhythm
             }
         }
 
+        /// <summary>预览下一个还没判定的音符（强拍指定用）。</summary>
+        public bool TryPeekNextNote(out NoteData note)
+        {
+            for (int i = 0; i < m_Chart.Notes.Count; i++)
+            {
+                if (!m_Judged[i])
+                {
+                    note = m_Chart.Notes[i];
+                    return true;
+                }
+            }
+
+            note = default(NoteData);
+            return false;
+        }
+
         private Judgement Judge(NoteData note, int index, float delta)
         {
             Judgement result;

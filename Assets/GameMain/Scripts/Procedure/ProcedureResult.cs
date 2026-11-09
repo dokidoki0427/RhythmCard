@@ -1,16 +1,17 @@
+using CardRhythm.Battle;
 using CardRhythm.UI;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
 
 namespace CardRhythm.Procedure
 {
-    /// <summary>结算：显示 ResultForm，Space 回地图（骨架阶段用来验证闭环）。</summary>
+    /// <summary>结算：把上一场战斗的结果交给 ResultForm 显示，Space 回地图。</summary>
     public sealed class ProcedureResult : GameProcedureBase
     {
         protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
         {
             base.OnEnter(procedureOwner);
-            UIRouter.Open(UIFormId.Result);
+            UIRouter.Open(UIFormId.Result, BattleResult.Last);
         }
 
         protected override void OnLeave(IFsm<IProcedureManager> procedureOwner, bool isShutdown)

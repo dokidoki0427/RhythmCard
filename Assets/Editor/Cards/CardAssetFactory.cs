@@ -13,7 +13,7 @@ namespace CardRhythm.EditorCards
     /// </summary>
     public static class CardAssetFactory
     {
-        public const string Folder = "Assets/GameMain/Data/Cards";
+        public const string Folder = "Assets/GameMain/Resources/Cards";
         public const string EffectFolder = "Assets/GameMain/Data/Effects";
 
         public static List<CardDefinition> LoadAll()

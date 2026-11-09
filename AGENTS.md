@@ -52,13 +52,13 @@
 
 - 场景入口是 `Assets/Scenes/Boot.unity`，里面放 `GameFramework` 预制体实例（22 个组件）。
 - 游戏流程继承 `GameProcedureBase`（`Assets/GameMain/Scripts/Procedure/`），并注册到 `ProcedureCatalog`；改完清单必须跑 `Tools → 卡牌音游 → 流程 → 配置 Boot 场景`，否则 GF 不会加载新流程。说明见 `流程骨架.md`。
-- 资源一律走 GF 异步接口（`LoadAsset` / `LoadUIForm` / `LoadEntity`），禁止 `Resources.Load` 和直接 `Instantiate` 业务预制体。
+- 资源一律走 GF 异步接口（`LoadAsset` / `LoadUIForm` / `LoadEntity`），禁止 `Resources.Load` 和直接 `Instantiate` 业务预制体。**例外**：原型期卡牌与效果资产放在 `Resources/` 下用 `Resources.LoadAll` 批量读取，接入正式资源管线后再迁走。
 - UI 用 uGUI + GF `UIComponent`：界面继承 `UIFormBase`，通过 `UIFormCatalog` 注册、`UIRouter.Open/Close/Back` 打开关闭；层级见 `界面层级框架.md`。
 - 新增界面必须同步：`UIFormId` 枚举、`UIFormCatalog` 定义、`Forms/XxxForm.cs`，然后跑 `Tools → 卡牌音游 → UI → 重建占位界面`。
 
 ## 内容制作
 
-- 卡牌用 `Tools → 卡牌音游 → 卡牌编辑器` 制作，资产在 `Assets/GameMain/Data/Cards/`，说明见 `卡牌编辑器.md`。
+- 卡牌用 `Tools → 卡牌音游 → 卡牌编辑器` 制作，资产在 `Assets/GameMain/Resources/Cards/`，说明见 `卡牌编辑器.md`。
 - 卡牌 `Id` 是稳定契约（存档 / 谱面 `sourceCardId` 都引用它），不要随意改。
 - 新增卡牌字段：改 `CardDefinition` + 在 `CardDesignerWindow.DrawFields` 里加一行 `PropertyField` + 在 `CardValidator` 里加规则。
 - `tools\verify.ps1` 的 `cards` 检查会扫描全部卡牌，重复 Id 或非法字段会让 CI 变红。

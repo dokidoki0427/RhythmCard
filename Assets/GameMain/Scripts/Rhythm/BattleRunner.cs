@@ -1,21 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using CardRhythm.Battle;
 using CardRhythm.Cards;
 using UnityEngine;
 
 namespace CardRhythm.Rhythm
 {
     /// <summary>
-    /// 一场战斗的运行器：建牌组 → 生成谱面 → 启动时钟 → 读输入 → 判定 → 结束。
-    /// 占位阶段牌组写死 8 张（4 种示例牌各 2 张），等卡组系统做好后替换 BuildDeck。
+    /// 一场战斗的运行器：加载卡牌 → 建牌组 → 生成谱面 → 启动时钟 → 判定 → 数值结算 → 结束。
+    /// 卡牌来自 Resources/Cards（原型阶段直接从 Resources 取，正式版换 GF 资源管线）。
     /// </summary>
     public class BattleRunner : MonoBehaviour
     {
         private static readonly KeyCode[] LaneKeys = { KeyCode.D, KeyCode.F, KeyCode.J, KeyCode.K };
+        private const int DeckSize = 8;
+        private const int AccentCycleBars = 4;
 
         private Conductor m_Conductor;
         private NoteStageView m_View;
         private LaneAudioPlayer m_Audio;
+        private BattleState m_State;
+        private Dictionary<string, CardDefinition> m_Cards;
+        private string m_AccentCardId;
         private float m_Bpm;
         private float m_EndTime;
 
@@ -24,22 +31,38 @@ namespace CardRhythm.Rhythm
         public bool IsFinished { get; private set; }
         public Judger Judger { get; private set; }
         public Chart Chart { get; private set; }
+        public BattleState State
+        {
+            get { return m_State; }
+        }
 
         public void Begin(float bpm = 120f, int bars = 32)
         {
             m_Bpm = bpm;
-            List<CardSpec> deck = BuildDeck();
+            m_Cards = LoadCards();
+            List<CardSpec> deck = BuildDeck(m_Cards.Values.ToList());
             Chart = ChartGenerator.Generate(deck, bpm, bars);
 
+            m_State = new BattleState();
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
             m_Audio = gameObject.AddComponent<LaneAudioPlayer>();
             m_Audio.Build();
+
             Judger = new Judger(Chart);
+            Judger.JudgedEvent += OnJudged;
             m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger);
 
             m_EndTime = Chart.Duration + 2f;
             m_Conductor.StartSong(bpm, 1.5f);
+        }
+
+        private void OnDestroy()
+        {
+            if (Judger != null)
+            {
+                Judger.JudgedEvent -= OnJudged;
+            }
         }
 
         private void Update()
@@ -61,21 +84,71 @@ namespace CardRhythm.Rhythm
                 }
             }
 
-            if (Judger.IsFinished || songTime > m_EndTime)
+            UpdateAccent(songTime);
+
+            if (Judger.IsFinished || songTime > m_EndTime || m_State.IsVictory || m_State.IsDefeat)
             {
-                IsFinished = true;
-                m_Conductor.StopSong();
-                var handler = Finished;
-                if (handler != null)
+                FinishBattle();
+            }
+        }
+
+        private void UpdateAccent(float songTime)
+        {
+            if (!Input.GetKeyDown(KeyCode.Space))
+            {
+                return;
+            }
+
+            // 每 4 小节的最后 1 小节是强拍窗口。
+            int bar = Mathf.FloorToInt(songTime / (m_Conductor.SecondsPerBeat * 4f));
+            bool windowOpen = bar % AccentCycleBars == AccentCycleBars - 1;
+
+            NoteData next;
+            if (!windowOpen || !Judger.TryPeekNextNote(out next))
+            {
+                return;
+            }
+
+            m_AccentCardId = next.SourceCardId;
+        }
+
+        private void OnJudged(NoteData note, Judgement judgement)
+        {
+            bool accent = !string.IsNullOrEmpty(m_AccentCardId) && note.SourceCardId == m_AccentCardId;
+            m_State.ApplyJudgement(judgement, DamageOf(note), accent);
+        }
+
+        private float DamageOf(NoteData note)
+        {
+            CardDefinition card;
+            if (m_Cards != null && m_Cards.TryGetValue(note.SourceCardId, out card))
+            {
+                var damageEffect = card.Effect as DamageEffect;
+                if (damageEffect != null)
                 {
-                    handler();
+                    return damageEffect.Damage / (float)Mathf.Max(1, card.NoteCount);
                 }
+            }
+
+            return 1f;
+        }
+
+        private void FinishBattle()
+        {
+            IsFinished = true;
+            m_Conductor.StopSong();
+            BattleResult.Last = BattleResult.From(m_State, m_State.IsVictory);
+
+            var handler = Finished;
+            if (handler != null)
+            {
+                handler();
             }
         }
 
         private void OnGUI()
         {
-            if (Judger == null)
+            if (m_State == null)
             {
                 return;
             }
@@ -84,23 +157,54 @@ namespace CardRhythm.Rhythm
             style.fontSize = 22;
             style.normal.textColor = Color.white;
 
-            GUI.Label(new Rect(24f, 96f, 600f, 28f), "Combo: " + Judger.Combo + "   Miss: " + Judger.MissCount, style);
-            GUI.Label(new Rect(24f, 126f, 600f, 28f), "Judged: " + Judger.Judged + " / " + Judger.Total, style);
-            if (Judger.LastJudgement.HasValue)
+            GUI.Label(new Rect(24f, 96f, 700f, 28f), "Player HP: " + m_State.DisplayPlayerHp + " / 100", style);
+            GUI.Label(new Rect(24f, 126f, 700f, 28f), "Enemy HP: " + m_State.DisplayEnemyHp + " / 300", style);
+            GUI.Label(new Rect(24f, 156f, 700f, 28f), "Combo: " + Judger.Combo + "   Score: " + m_State.Score, style);
+            GUI.Label(new Rect(24f, 186f, 700f, 28f), "Judged: " + Judger.Judged + " / " + Judger.Total + "   Miss: " + m_State.Miss, style);
+
+            if (!string.IsNullOrEmpty(m_AccentCardId))
             {
-                GUI.Label(new Rect(24f, 156f, 600f, 28f), "Last: " + Judger.LastJudgement.Value, style);
+                GUI.Label(new Rect(24f, 216f, 700f, 28f), "ACCENT armed: " + m_AccentCardId, style);
             }
         }
 
-        private static List<CardSpec> BuildDeck()
+        private static Dictionary<string, CardDefinition> LoadCards()
         {
-            var deck = new List<CardSpec>();
-            for (int i = 0; i < 2; i++)
+            var cards = new Dictionary<string, CardDefinition>();
+            foreach (CardDefinition card in Resources.LoadAll<CardDefinition>("Cards"))
             {
-                deck.Add(new CardSpec("slash", 1, CardPattern.Sequence, 0, new Color(0.35f, 0.75f, 1f)));
-                deck.Add(new CardSpec("double_hit", 2, CardPattern.Alternate, 0, new Color(0.45f, 0.9f, 0.55f)));
-                deck.Add(new CardSpec("heavy_slash", 3, CardPattern.Mirror, 0, new Color(1f, 0.72f, 0.3f)));
-                deck.Add(new CardSpec("wild_strike", 4, CardPattern.Random, 7, new Color(0.95f, 0.45f, 0.85f)));
+                if (card != null && !cards.ContainsKey(card.Id))
+                {
+                    cards.Add(card.Id, card);
+                }
+            }
+
+            if (cards.Count == 0)
+            {
+                Debug.LogWarning("[BATTLE] Resources/Cards 为空，使用无效果占位牌。");
+            }
+
+            return cards;
+        }
+
+        private static List<CardSpec> BuildDeck(List<CardDefinition> cards)
+        {
+            var deck = new List<CardSpec>(DeckSize);
+            if (cards.Count == 0)
+            {
+                for (int i = 0; i < DeckSize; i++)
+                {
+                    deck.Add(new CardSpec("placeholder", 1, CardPattern.Sequence, 0, Color.white));
+                }
+
+                return deck;
+            }
+
+            cards.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
+            for (int i = 0; i < DeckSize; i++)
+            {
+                CardDefinition card = cards[i % cards.Count];
+                deck.Add(new CardSpec(card.Id, Mathf.Clamp(card.NoteCount, 1, 4), card.Pattern, card.EffectiveSeed, card.Accent));
             }
 
             return deck;
