@@ -33,7 +33,7 @@ namespace CardRhythm.Rhythm
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
             Judger = new Judger(Chart);
-            m_View.Build(Chart, m_Conductor, BuildColors(deck));
+            m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger);
 
             m_EndTime = Chart.Duration + 2f;
             m_Conductor.StartSong(bpm, 1.5f);
