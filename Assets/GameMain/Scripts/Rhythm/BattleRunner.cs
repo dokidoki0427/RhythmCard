@@ -4,6 +4,7 @@ using System.Linq;
 using CardRhythm.Battle;
 using CardRhythm.Cards;
 using CardRhythm.Settings;
+using CardRhythm.UI;
 using UnityEngine;
 
 namespace CardRhythm.Rhythm
@@ -14,7 +15,6 @@ namespace CardRhythm.Rhythm
     /// </summary>
     public class BattleRunner : MonoBehaviour
     {
-        private static readonly KeyCode[] LaneKeys = { KeyCode.D, KeyCode.F, KeyCode.J, KeyCode.K };
         private const int DeckSize = 8;
         private const int AccentCycleBars = 4;
 
@@ -28,9 +28,12 @@ namespace CardRhythm.Rhythm
         private float m_Bpm;
         private float m_EndTime;
 
+        public static BattleRunner Current { get; private set; }
+
         public event Action Finished;
 
         public bool IsFinished { get; private set; }
+        public bool AbortRequested { get; private set; }
         public Judger Judger { get; private set; }
         public Chart Chart { get; private set; }
         public BattleState State
@@ -58,10 +61,16 @@ namespace CardRhythm.Rhythm
 
             m_EndTime = Chart.Duration + 2f;
             m_Conductor.StartSong(bpm, 1.5f);
+            Current = this;
         }
 
         private void OnDestroy()
         {
+            if (Current == this)
+            {
+                Current = null;
+            }
+
             if (Judger != null)
             {
                 Judger.JudgedEvent -= OnJudged;
@@ -75,13 +84,29 @@ namespace CardRhythm.Rhythm
                 return;
             }
 
+            if (Input.GetKeyDown(KeyCode.Escape) && !UIRouter.HasModal)
+            {
+                TogglePause();
+                return;
+            }
+
+            if (m_Conductor.IsPaused)
+            {
+                if (!UIRouter.HasModal)
+                {
+                    m_Conductor.Resume();
+                }
+
+                return;
+            }
+
             float songTime = m_Conductor.SongTime;
             Judger.Update(songTime);
             m_State.TickBar(Mathf.FloorToInt(songTime / (m_Conductor.SecondsPerBeat * 4f)));
 
-            for (int lane = 0; lane < LaneKeys.Length; lane++)
+            for (int lane = 0; lane < 4; lane++)
             {
-                if (Input.GetKeyDown(LaneKeys[lane]))
+                if (InputKeys.LaneDown(lane))
                 {
                     m_Audio.Play(lane);
                     Judger.Hit(lane, songTime - GameSettings.OffsetSeconds);
@@ -94,6 +119,28 @@ namespace CardRhythm.Rhythm
             {
                 FinishBattle();
             }
+        }
+
+        /// <summary>Esc 暂停/继续：冻结 dspTime 与音频，不用 timeScale。</summary>
+        private void TogglePause()
+        {
+            if (m_Conductor.IsPaused)
+            {
+                m_Conductor.Resume();
+                UIRouter.Close(UIFormId.Pause);
+            }
+            else
+            {
+                m_Conductor.Pause();
+                UIRouter.Open(UIFormId.Pause, null, true, true);
+            }
+        }
+
+        /// <summary>暂停菜单里“退出到菜单”。</summary>
+        public void RequestAbort()
+        {
+            AbortRequested = true;
+            UIRouter.Close(UIFormId.Pause);
         }
 
         private void UpdateAccent(float songTime)

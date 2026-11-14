@@ -12,10 +12,18 @@ namespace CardRhythm.Rhythm
         private double m_StartDsp;
         private float m_Bpm = 120f;
         private bool m_Running;
+        private bool m_Paused;
+        private double m_PauseDsp;
+        private float m_PausedSongTime;
 
         public bool IsRunning
         {
             get { return m_Running; }
+        }
+
+        public bool IsPaused
+        {
+            get { return m_Paused; }
         }
 
         public float Bpm
@@ -28,10 +36,53 @@ namespace CardRhythm.Rhythm
             get { return 60f / m_Bpm; }
         }
 
-        /// <summary>相对歌曲开始的时间（秒）。前奏期会是负数。</summary>
+        /// <summary>相对歌曲开始的时间（秒）。前奏期会是负数；暂停时冻结。</summary>
         public float SongTime
         {
-            get { return m_Running ? (float)(AudioSettings.dspTime - m_StartDsp) : 0f; }
+            get
+            {
+                if (!m_Running)
+                {
+                    return 0f;
+                }
+
+                return m_Paused ? m_PausedSongTime : (float)(AudioSettings.dspTime - m_StartDsp);
+            }
+        }
+
+        /// <summary>暂停：冻结时钟并暂停音频，不用 timeScale。</summary>
+        public void Pause()
+        {
+            if (!m_Running || m_Paused)
+            {
+                return;
+            }
+
+            m_PauseDsp = AudioSettings.dspTime;
+            m_PausedSongTime = (float)(m_PauseDsp - m_StartDsp);
+            if (m_Source != null)
+            {
+                m_Source.Pause();
+            }
+
+            m_Paused = true;
+        }
+
+        /// <summary>恢复：把暂停时长补回起始 dsp，音频从原位置继续。</summary>
+        public void Resume()
+        {
+            if (!m_Running || !m_Paused)
+            {
+                return;
+            }
+
+            m_StartDsp += AudioSettings.dspTime - m_PauseDsp;
+            if (m_Source != null)
+            {
+                m_Source.UnPause();
+            }
+
+            m_Paused = false;
         }
 
         public void StartSong(float bpm, float leadInSeconds = 1f)

@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using CardRhythm.Settings;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -306,7 +307,7 @@ namespace CardRhythm.Rhythm
             capImage.raycastTarget = false;
             m_KeyCaps.Add(capImage);
 
-            var label = CreateText(cap, LaneKey(lane), 42, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.85f));
+            var label = CreateText(cap, InputKeys.LaneLabel(lane), 42, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.85f));
             label.rectTransform.anchorMin = Vector2.zero;
             label.rectTransform.anchorMax = Vector2.one;
             label.rectTransform.sizeDelta = Vector2.zero;
@@ -385,7 +386,7 @@ namespace CardRhythm.Rhythm
         {
             for (int lane = 0; lane < m_KeyCaps.Count; lane++)
             {
-                bool held = Input.GetKey(KeyCodeOf(lane));
+                bool held = InputKeys.LaneHeld(lane);
                 Color color = held ? new Color(1f, 0.85f, 0.35f, 0.85f) : new Color(1f, 1f, 1f, 0.16f);
                 m_KeyCaps[lane].color = color;
                 m_KeyLabels[lane].color = held ? Color.black : new Color(1f, 1f, 1f, 0.85f);

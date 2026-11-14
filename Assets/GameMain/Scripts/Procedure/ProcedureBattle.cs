@@ -1,3 +1,4 @@
+using CardRhythm.Battle;
 using CardRhythm.Rhythm;
 using CardRhythm.UI;
 using GameFramework.Fsm;
@@ -41,6 +42,13 @@ namespace CardRhythm.Procedure
         protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
         {
             base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
+
+            if (m_Runner != null && m_Runner.AbortRequested)
+            {
+                RunState.ResetRun();
+                ChangeTo<ProcedureMenu>();
+                return;
+            }
 
             if (m_Runner != null && m_Runner.IsFinished)
             {

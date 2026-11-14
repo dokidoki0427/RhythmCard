@@ -87,5 +87,45 @@ namespace CardRhythm.Settings
             PlayerPrefs.Save();
             return true;
         }
+
+        // ── 键位重绑 ──────────────────────────────────────────────
+
+        private static readonly KeyCode[] DefaultKeys = { KeyCode.D, KeyCode.F, KeyCode.J, KeyCode.K };
+
+        public static KeyCode GetLaneKey(int lane)
+        {
+            lane = Mathf.Clamp(lane, 0, DefaultKeys.Length - 1);
+            return (KeyCode)PlayerPrefs.GetInt("rhythm.key." + lane, (int)DefaultKeys[lane]);
+        }
+
+        public static void SetLaneKey(int lane, KeyCode key)
+        {
+            lane = Mathf.Clamp(lane, 0, DefaultKeys.Length - 1);
+            PlayerPrefs.SetInt("rhythm.key." + lane, (int)key);
+            PlayerPrefs.Save();
+        }
+
+        public static bool IsLaneKeyTaken(KeyCode key, int exceptLane)
+        {
+            for (int lane = 0; lane < DefaultKeys.Length; lane++)
+            {
+                if (lane != exceptLane && GetLaneKey(lane) == key)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static void ResetLaneKeys()
+        {
+            for (int lane = 0; lane < DefaultKeys.Length; lane++)
+            {
+                PlayerPrefs.DeleteKey("rhythm.key." + lane);
+            }
+
+            PlayerPrefs.Save();
+        }
     }
 }

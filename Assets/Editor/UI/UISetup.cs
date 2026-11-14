@@ -188,6 +188,7 @@ namespace CardRhythm.EditorUI
                 case UIFormId.Settings: return typeof(SettingsForm);
                 case UIFormId.Deck: return typeof(DeckForm);
                 case UIFormId.Reward: return typeof(RewardForm);
+                case UIFormId.Pause: return typeof(PauseForm);
                 default: return null;
             }
         }
