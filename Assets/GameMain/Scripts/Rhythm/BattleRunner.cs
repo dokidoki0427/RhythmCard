@@ -125,7 +125,7 @@ namespace CardRhythm.Rhythm
                 {
                     var damageEffect = displayed.Effect as DamageEffect;
                     m_View.ShowPlayedCard(displayed.Id, displayed.DisplayName, displayed.Accent,
-                        damageEffect != null ? damageEffect.Damage : 1);
+                        damageEffect != null ? damageEffect.Damage : 1, displayed.Icon);
                 }
             }
 

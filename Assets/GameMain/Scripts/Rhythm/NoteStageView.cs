@@ -34,7 +34,8 @@ namespace CardRhythm.Rhythm
         private readonly float[] m_LaneFlashAlphas = new float[4];
 
         private const int MaxPlayedCards = 5;
-        private const float PlayedCardHeight = 92f;
+        private const float PlayedCardHeight = 150f;
+        private const float TravelBeats = 4f;
 
         private RectTransform m_CharacterPanel;
 
@@ -54,7 +55,7 @@ namespace CardRhythm.Rhythm
             m_Chart = chart;
             m_Conductor = conductor;
             m_Judger = judger;
-            m_TravelSeconds = conductor.SecondsPerBeat * 2f;
+            m_TravelSeconds = conductor.SecondsPerBeat * TravelBeats;
 
             var canvasObject = new GameObject("NoteStage", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);
@@ -168,8 +169,8 @@ namespace CardRhythm.Rhythm
             return panel;
         }
 
-        /// <summary>在角色区追加一张“刚打出的牌”，按打出顺序从上往下排。</summary>
-        public void ShowPlayedCard(string cardId, string displayName, Color accent, int damage)
+        /// <summary>在角色区追加一张“刚打出的牌”，按打出顺序从上往下排。显示卡面（有图标用图标，没有则用强调色卡面）。</summary>
+        public void ShowPlayedCard(string cardId, string displayName, Color accent, int damage, Sprite icon)
         {
             if (m_CharacterPanel == null)
             {
@@ -182,33 +183,59 @@ namespace CardRhythm.Rhythm
             root.pivot = new Vector2(0f, 1f);
             root.sizeDelta = new Vector2(SidePanelWidth - 24f, PlayedCardHeight);
 
-            var background = root.gameObject.AddComponent<Image>();
-            background.color = new Color(0.08f, 0.1f, 0.14f, 0.95f);
-            background.raycastTarget = false;
+            var border = root.gameObject.AddComponent<Image>();
+            border.color = accent;
+            border.raycastTarget = false;
 
-            var stripe = CreateRect(root, "Accent");
-            stripe.anchorMin = new Vector2(0f, 0f);
-            stripe.anchorMax = new Vector2(0f, 1f);
-            stripe.pivot = new Vector2(0f, 0.5f);
-            stripe.sizeDelta = new Vector2(6f, 0f);
-            stripe.anchoredPosition = Vector2.zero;
-            var stripeImage = stripe.gameObject.AddComponent<Image>();
-            stripeImage.color = accent;
-            stripeImage.raycastTarget = false;
+            var face = CreateRect(root, "Face");
+            face.anchorMin = Vector2.zero;
+            face.anchorMax = Vector2.one;
+            face.offsetMin = new Vector2(5f, 5f);
+            face.offsetMax = new Vector2(-5f, -5f);
 
-            var name = CreateText(root, displayName, 28, TextAnchor.MiddleLeft, Color.white);
-            name.rectTransform.anchorMin = new Vector2(0f, 0.5f);
-            name.rectTransform.anchorMax = new Vector2(1f, 0.5f);
-            name.rectTransform.pivot = new Vector2(0f, 0.5f);
-            name.rectTransform.sizeDelta = new Vector2(-90f, 40f);
-            name.rectTransform.anchoredPosition = new Vector2(18f, 12f);
+            var faceImage = face.gameObject.AddComponent<Image>();
+            faceImage.raycastTarget = false;
+            if (icon != null)
+            {
+                faceImage.sprite = icon;
+                faceImage.preserveAspect = true;
+                faceImage.color = Color.white;
+            }
+            else
+            {
+                faceImage.color = new Color(accent.r * 0.35f, accent.g * 0.35f, accent.b * 0.35f, 1f);
+            }
 
-            var damageLabel = CreateText(root, "+" + damage, 30, TextAnchor.MiddleRight, accent);
-            damageLabel.rectTransform.anchorMin = new Vector2(0f, 0f);
-            damageLabel.rectTransform.anchorMax = new Vector2(1f, 0f);
-            damageLabel.rectTransform.pivot = new Vector2(1f, 0f);
-            damageLabel.rectTransform.sizeDelta = new Vector2(-24f, 36f);
-            damageLabel.rectTransform.anchoredPosition = new Vector2(-12f, 6f);
+            var nameBar = CreateRect(root, "NameBar");
+            nameBar.anchorMin = new Vector2(0f, 0f);
+            nameBar.anchorMax = new Vector2(1f, 0f);
+            nameBar.pivot = new Vector2(0f, 0f);
+            nameBar.sizeDelta = new Vector2(-10f, 44f);
+            nameBar.anchoredPosition = new Vector2(5f, 5f);
+            var nameBarImage = nameBar.gameObject.AddComponent<Image>();
+            nameBarImage.color = new Color(0.03f, 0.04f, 0.06f, 0.82f);
+            nameBarImage.raycastTarget = false;
+
+            var name = CreateText(nameBar, displayName, 26, TextAnchor.MiddleLeft, Color.white);
+            name.rectTransform.anchorMin = Vector2.zero;
+            name.rectTransform.anchorMax = Vector2.one;
+            name.rectTransform.sizeDelta = new Vector2(-16f, 0f);
+            name.rectTransform.anchoredPosition = new Vector2(8f, 0f);
+
+            var damageBadge = CreateRect(root, "Damage");
+            damageBadge.anchorMin = new Vector2(1f, 1f);
+            damageBadge.anchorMax = new Vector2(1f, 1f);
+            damageBadge.pivot = new Vector2(1f, 1f);
+            damageBadge.sizeDelta = new Vector2(76f, 40f);
+            damageBadge.anchoredPosition = new Vector2(-5f, -5f);
+            var badgeImage = damageBadge.gameObject.AddComponent<Image>();
+            badgeImage.color = new Color(0.03f, 0.04f, 0.06f, 0.82f);
+            badgeImage.raycastTarget = false;
+
+            var damageLabel = CreateText(damageBadge, "+" + damage, 28, TextAnchor.MiddleCenter, Color.white);
+            damageLabel.rectTransform.anchorMin = Vector2.zero;
+            damageLabel.rectTransform.anchorMax = Vector2.one;
+            damageLabel.rectTransform.sizeDelta = Vector2.zero;
 
             m_PlayedCards.Insert(0, new PlayedCardView { Root = root });
             while (m_PlayedCards.Count > MaxPlayedCards)
