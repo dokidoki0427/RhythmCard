@@ -186,6 +186,7 @@ namespace CardRhythm.EditorUI
                 case UIFormId.BattleHud: return typeof(BattleHudForm);
                 case UIFormId.Result: return typeof(ResultForm);
                 case UIFormId.Settings: return typeof(SettingsForm);
+                case UIFormId.Deck: return typeof(DeckForm);
                 default: return null;
             }
         }

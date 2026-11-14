@@ -49,7 +49,7 @@ namespace CardRhythm.EditorCards
 
         /// <summary>按固定 Id 创建（示例卡用）；已存在则直接返回，不重复创建。</summary>
         public static CardDefinition Ensure(string id, string displayName, int noteCount, CardEffect effect,
-            CardNoteType noteType = CardNoteType.Tap, CardPattern pattern = CardPattern.Sequence)
+            CardNoteType noteType = CardNoteType.Tap, CardPattern pattern = CardPattern.Sequence, Color? accent = null)
         {
             var existing = LoadAll().FirstOrDefault(c => c.Id == id);
             if (existing != null)
@@ -65,6 +65,10 @@ namespace CardRhythm.EditorCards
             card.Effect = effect;
             card.NoteType = noteType;
             card.Pattern = pattern;
+            if (accent.HasValue)
+            {
+                card.Accent = accent.Value;
+            }
 
             string path = AssetDatabase.GenerateUniqueAssetPath(Folder + "/" + id + ".asset");
             AssetDatabase.CreateAsset(card, path);

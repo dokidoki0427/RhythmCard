@@ -48,6 +48,12 @@ namespace CardRhythm.Procedure
             }
         }
 
+        /// <summary>战斗里 Space 用于强拍，不参与流程推进。</summary>
+        protected override bool SpaceAdvanceEnabled
+        {
+            get { return false; }
+        }
+
         /// <summary>Space 仍然可以跳过战斗（调试用）。</summary>
         public override void RequestAdvance()
         {

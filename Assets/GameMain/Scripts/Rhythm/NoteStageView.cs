@@ -28,6 +28,15 @@ namespace CardRhythm.Rhythm
         private readonly List<Image> m_KeyCaps = new List<Image>();
         private readonly List<Text> m_KeyLabels = new List<Text>();
         private readonly List<JudgementPopup> m_Popups = new List<JudgementPopup>();
+        private readonly List<PlayedCardView> m_PlayedCards = new List<PlayedCardView>();
+        private readonly Image[] m_LaneFlashes = new Image[4];
+        private readonly Color[] m_LaneFlashColors = new Color[4];
+        private readonly float[] m_LaneFlashAlphas = new float[4];
+
+        private const int MaxPlayedCards = 5;
+        private const float PlayedCardHeight = 92f;
+
+        private RectTransform m_CharacterPanel;
 
         private Chart m_Chart;
         private Conductor m_Conductor;
@@ -58,7 +67,7 @@ namespace CardRhythm.Rhythm
             scaler.matchWidthOrHeight = 0.5f;
             m_CanvasRoot = canvasObject.transform;
 
-            BuildSidePanel(canvasObject.transform, "CharacterPanel", "CHARACTER", 0f, new Color(0.14f, 0.2f, 0.3f, 0.9f));
+            m_CharacterPanel = BuildSidePanel(canvasObject.transform, "CharacterPanel", "CHARACTER", 0f, new Color(0.14f, 0.2f, 0.3f, 0.9f));
             BuildSidePanel(canvasObject.transform, "MonsterPanel", "MONSTER", ReferenceWidth - SidePanelWidth, new Color(0.3f, 0.14f, 0.16f, 0.9f));
 
             for (int lane = 0; lane < 4; lane++)
@@ -85,6 +94,21 @@ namespace CardRhythm.Rhythm
             var lineImage = judgeLine.gameObject.AddComponent<Image>();
             lineImage.color = new Color(1f, 1f, 1f, 0.65f);
             lineImage.raycastTarget = false;
+
+            for (int lane = 0; lane < 4; lane++)
+            {
+                var flashRect = CreateRect(canvasObject.transform, "LaneFlash" + lane);
+                flashRect.anchorMin = new Vector2(0f, 0f);
+                flashRect.anchorMax = new Vector2(0f, 0f);
+                flashRect.pivot = new Vector2(0f, 0.5f);
+                flashRect.sizeDelta = new Vector2(LaneWidth, 18f);
+                flashRect.anchoredPosition = new Vector2(LaneAreaX + lane * LaneWidth, JudgeLineY);
+
+                var flashImage = flashRect.gameObject.AddComponent<Image>();
+                flashImage.color = new Color(1f, 1f, 1f, 0f);
+                flashImage.raycastTarget = false;
+                m_LaneFlashes[lane] = flashImage;
+            }
 
             for (int i = 0; i < chart.Notes.Count; i++)
             {
@@ -124,7 +148,7 @@ namespace CardRhythm.Rhythm
             }
         }
 
-        private void BuildSidePanel(Transform parent, string name, string label, float x, Color color)
+        private RectTransform BuildSidePanel(Transform parent, string name, string label, float x, Color color)
         {
             var panel = CreateRect(parent, name);
             panel.anchorMin = new Vector2(0f, 0f);
@@ -141,6 +165,104 @@ namespace CardRhythm.Rhythm
             text.rectTransform.anchorMin = Vector2.zero;
             text.rectTransform.anchorMax = Vector2.one;
             text.rectTransform.sizeDelta = Vector2.zero;
+            return panel;
+        }
+
+        /// <summary>在角色区追加一张“刚打出的牌”，按打出顺序从上往下排。</summary>
+        public void ShowPlayedCard(string cardId, string displayName, Color accent, int damage)
+        {
+            if (m_CharacterPanel == null)
+            {
+                return;
+            }
+
+            var root = CreateRect(m_CharacterPanel, "Played_" + cardId);
+            root.anchorMin = new Vector2(0f, 1f);
+            root.anchorMax = new Vector2(0f, 1f);
+            root.pivot = new Vector2(0f, 1f);
+            root.sizeDelta = new Vector2(SidePanelWidth - 24f, PlayedCardHeight);
+
+            var background = root.gameObject.AddComponent<Image>();
+            background.color = new Color(0.08f, 0.1f, 0.14f, 0.95f);
+            background.raycastTarget = false;
+
+            var stripe = CreateRect(root, "Accent");
+            stripe.anchorMin = new Vector2(0f, 0f);
+            stripe.anchorMax = new Vector2(0f, 1f);
+            stripe.pivot = new Vector2(0f, 0.5f);
+            stripe.sizeDelta = new Vector2(6f, 0f);
+            stripe.anchoredPosition = Vector2.zero;
+            var stripeImage = stripe.gameObject.AddComponent<Image>();
+            stripeImage.color = accent;
+            stripeImage.raycastTarget = false;
+
+            var name = CreateText(root, displayName, 28, TextAnchor.MiddleLeft, Color.white);
+            name.rectTransform.anchorMin = new Vector2(0f, 0.5f);
+            name.rectTransform.anchorMax = new Vector2(1f, 0.5f);
+            name.rectTransform.pivot = new Vector2(0f, 0.5f);
+            name.rectTransform.sizeDelta = new Vector2(-90f, 40f);
+            name.rectTransform.anchoredPosition = new Vector2(18f, 12f);
+
+            var damageLabel = CreateText(root, "+" + damage, 30, TextAnchor.MiddleRight, accent);
+            damageLabel.rectTransform.anchorMin = new Vector2(0f, 0f);
+            damageLabel.rectTransform.anchorMax = new Vector2(1f, 0f);
+            damageLabel.rectTransform.pivot = new Vector2(1f, 0f);
+            damageLabel.rectTransform.sizeDelta = new Vector2(-24f, 36f);
+            damageLabel.rectTransform.anchoredPosition = new Vector2(-12f, 6f);
+
+            m_PlayedCards.Insert(0, new PlayedCardView { Root = root });
+            while (m_PlayedCards.Count > MaxPlayedCards)
+            {
+                PlayedCardView last = m_PlayedCards[m_PlayedCards.Count - 1];
+                m_PlayedCards.RemoveAt(m_PlayedCards.Count - 1);
+                if (last.Root != null)
+                {
+                    Destroy(last.Root.gameObject);
+                }
+            }
+
+            RepositionPlayedCards();
+        }
+
+        /// <summary>判定成功时给对应轨的判定线打一道颜色。</summary>
+        public void FlashLane(int lane, Color color)
+        {
+            if (lane < 0 || lane >= m_LaneFlashes.Length || m_LaneFlashes[lane] == null)
+            {
+                return;
+            }
+
+            m_LaneFlashColors[lane] = color;
+            m_LaneFlashAlphas[lane] = 1f;
+        }
+
+        private void RepositionPlayedCards()
+        {
+            for (int i = 0; i < m_PlayedCards.Count; i++)
+            {
+                RectTransform root = m_PlayedCards[i].Root;
+                if (root != null)
+                {
+                    root.anchoredPosition = new Vector2(12f, -16f - i * (PlayedCardHeight + 10f));
+                }
+            }
+        }
+
+        private void UpdateLaneFlashes()
+        {
+            for (int lane = 0; lane < m_LaneFlashes.Length; lane++)
+            {
+                Image image = m_LaneFlashes[lane];
+                if (image == null)
+                {
+                    continue;
+                }
+
+                m_LaneFlashAlphas[lane] = Mathf.Max(0f, m_LaneFlashAlphas[lane] - Time.deltaTime * 4f);
+                Color color = m_LaneFlashColors[lane];
+                color.a = m_LaneFlashAlphas[lane] * 0.9f;
+                image.color = color;
+            }
         }
 
         private void BuildKeyHint(RectTransform laneRect, int lane)
@@ -204,6 +326,7 @@ namespace CardRhythm.Rhythm
         {
             UpdateKeyFeedback();
             UpdatePopups();
+            UpdateLaneFlashes();
 
             if (m_Chart == null || m_Conductor == null || !m_Conductor.IsRunning)
             {
@@ -293,7 +416,7 @@ namespace CardRhythm.Rhythm
             }
         }
 
-        private static Color ColorOf(Judgement judgement)
+        public static Color ColorOf(Judgement judgement)
         {
             switch (judgement)
             {
@@ -352,6 +475,11 @@ namespace CardRhythm.Rhythm
             public Text Text;
             public float Age;
             public int Lane;
+        }
+
+        private sealed class PlayedCardView
+        {
+            public RectTransform Root;
         }
     }
 }

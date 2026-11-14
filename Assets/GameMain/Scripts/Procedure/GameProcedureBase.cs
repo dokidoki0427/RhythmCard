@@ -1,3 +1,4 @@
+using CardRhythm.UI;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
 using UnityEngine;
@@ -34,11 +35,17 @@ namespace CardRhythm.Procedure
             base.OnLeave(procedureOwner, isShutdown);
         }
 
+        /// <summary>是否允许 Space 推进（战斗里 Space 用于强拍，必须关掉）。</summary>
+        protected virtual bool SpaceAdvanceEnabled
+        {
+            get { return true; }
+        }
+
         protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
         {
             base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (SpaceAdvanceEnabled && !UIRouter.HasModal && Input.GetKeyDown(KeyCode.Space))
             {
                 RequestAdvance();
             }

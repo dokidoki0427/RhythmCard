@@ -60,7 +60,8 @@ namespace CardRhythm.Rhythm
             }
         }
 
-        private static AudioClip CreateClickLoop(float bpm)
+        /// <summary>生成 4 拍节拍器循环（设置页校准也复用）。</summary>
+        public static AudioClip CreateClickLoop(float bpm)
         {
             const int sampleRate = 44100;
             float beat = 60f / bpm;

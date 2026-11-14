@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70fbef45ca109044a8d3cf39931a17fd, type: 3}
+  m_Name: burst
+  m_EditorClassIdentifier: 
+  m_Id: burst
+  m_DisplayName: "\u7206\u53D1"
+  m_Description: 
+  m_Rarity: 0
+  m_NoteType: 0
+  m_Pattern: 3
+  m_NoteCount: 4
+  m_Seed: 0
+  m_Icon: {fileID: 0}
+  m_Accent: {r: 1, g: 0.4, b: 0.5, a: 1}
+  m_Effect: {fileID: 11400000, guid: 096d622e825037b4d9f1fcbc4d81e4d6, type: 2}

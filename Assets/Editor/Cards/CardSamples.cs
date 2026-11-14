@@ -36,7 +36,21 @@ namespace CardRhythm.EditorCards
             CardAssetFactory.Ensure("heavy_slash", "重斩", 3,
                 CardAssetFactory.EnsureDamageEffect("heavy_slash_damage", 12), CardNoteType.Tap, CardPattern.Mirror);
             CardAssetFactory.Ensure("wild_strike", "乱击", 4,
-                CardAssetFactory.EnsureDamageEffect("wild_strike_damage", 18), CardNoteType.Tap, CardPattern.Random);
+                CardAssetFactory.EnsureDamageEffect("wild_strike_damage", 18), CardNoteType.Tap, CardPattern.Random,
+                new Color(0.95f, 0.45f, 0.85f));
+
+            CardAssetFactory.Ensure("pierce", "穿刺", 2,
+                CardAssetFactory.EnsureDamageEffect("pierce_damage", 9), CardNoteType.Tap, CardPattern.Sequence,
+                new Color(0.6f, 0.9f, 0.45f));
+            CardAssetFactory.Ensure("sweep", "横扫", 3,
+                CardAssetFactory.EnsureDamageEffect("sweep_damage", 14), CardNoteType.Tap, CardPattern.Alternate,
+                new Color(1f, 0.65f, 0.3f));
+            CardAssetFactory.Ensure("burst", "爆发", 4,
+                CardAssetFactory.EnsureDamageEffect("burst_damage", 22), CardNoteType.Tap, CardPattern.Random,
+                new Color(1f, 0.4f, 0.5f));
+            CardAssetFactory.Ensure("jab", "刺击", 1,
+                CardAssetFactory.EnsureDamageEffect("jab_damage", 4), CardNoteType.Tap, CardPattern.Sequence,
+                new Color(0.5f, 0.8f, 1f));
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

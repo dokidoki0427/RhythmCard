@@ -12,13 +12,20 @@ namespace CardRhythm.UI
     public static class UIRouter
     {
         private static readonly List<int> s_OpenSerialIds = new List<int>();
+        private static readonly List<int> s_ModalSerialIds = new List<int>();
 
         public static int OpenCount
         {
             get { return s_OpenSerialIds.Count; }
         }
 
-        public static int Open(UIFormId id, object userData = null, bool pauseCovered = true)
+        /// <summary>是否有模态弹窗（设置/牌组）打开。有的话流程不应响应 Space。</summary>
+        public static bool HasModal
+        {
+            get { return s_ModalSerialIds.Count > 0; }
+        }
+
+        public static int Open(UIFormId id, object userData = null, bool pauseCovered = true, bool modal = false)
         {
             var uiComponent = GameEntry.GetComponent<UIComponent>();
             if (uiComponent == null)
@@ -32,6 +39,10 @@ namespace CardRhythm.UI
             if (serialId > 0)
             {
                 s_OpenSerialIds.Add(serialId);
+                if (modal)
+                {
+                    s_ModalSerialIds.Add(serialId);
+                }
             }
 
             return serialId;
@@ -53,6 +64,7 @@ namespace CardRhythm.UI
             }
 
             s_OpenSerialIds.Remove(form.SerialId);
+            s_ModalSerialIds.Remove(form.SerialId);
             uiComponent.CloseUIForm(form);
         }
 
@@ -68,6 +80,7 @@ namespace CardRhythm.UI
             int index = s_OpenSerialIds.Count - 1;
             int serialId = s_OpenSerialIds[index];
             s_OpenSerialIds.RemoveAt(index);
+            s_ModalSerialIds.Remove(serialId);
             uiComponent.CloseUIForm(serialId);
             return true;
         }
@@ -87,6 +100,7 @@ namespace CardRhythm.UI
             }
 
             s_OpenSerialIds.Clear();
+            s_ModalSerialIds.Clear();
         }
     }
 }

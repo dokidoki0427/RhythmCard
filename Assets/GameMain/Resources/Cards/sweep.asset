@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70fbef45ca109044a8d3cf39931a17fd, type: 3}
+  m_Name: sweep
+  m_EditorClassIdentifier: 
+  m_Id: sweep
+  m_DisplayName: "\u6A2A\u626B"
+  m_Description: 
+  m_Rarity: 0
+  m_NoteType: 0
+  m_Pattern: 1
+  m_NoteCount: 3
+  m_Seed: 0
+  m_Icon: {fileID: 0}
+  m_Accent: {r: 1, g: 0.65, b: 0.3, a: 1}
+  m_Effect: {fileID: 11400000, guid: 16be194c8441b7e4997dfb822be784b3, type: 2}

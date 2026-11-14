@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CardRhythm.Battle;
 using CardRhythm.Cards;
+using CardRhythm.Settings;
 using UnityEngine;
 
 namespace CardRhythm.Rhythm
@@ -23,6 +24,7 @@ namespace CardRhythm.Rhythm
         private BattleState m_State;
         private Dictionary<string, CardDefinition> m_Cards;
         private string m_AccentCardId;
+        private string m_LastShownCardId;
         private float m_Bpm;
         private float m_EndTime;
 
@@ -40,7 +42,8 @@ namespace CardRhythm.Rhythm
         {
             m_Bpm = bpm;
             m_Cards = LoadCards();
-            List<CardSpec> deck = BuildDeck(m_Cards.Values.ToList());
+            List<CardDefinition> deckCards = ResolveDeckCards(m_Cards);
+            List<CardSpec> deck = BuildDeck(deckCards);
             Chart = ChartGenerator.Generate(deck, bpm, bars);
 
             m_State = new BattleState();
@@ -80,7 +83,7 @@ namespace CardRhythm.Rhythm
                 if (Input.GetKeyDown(LaneKeys[lane]))
                 {
                     m_Audio.Play(lane);
-                    Judger.Hit(lane, songTime);
+                    Judger.Hit(lane, songTime - GameSettings.OffsetSeconds);
                 }
             }
 
@@ -114,6 +117,23 @@ namespace CardRhythm.Rhythm
 
         private void OnJudged(NoteData note, Judgement judgement)
         {
+            if (note.SourceCardId != m_LastShownCardId)
+            {
+                m_LastShownCardId = note.SourceCardId;
+                CardDefinition displayed;
+                if (m_Cards != null && m_Cards.TryGetValue(note.SourceCardId, out displayed))
+                {
+                    var damageEffect = displayed.Effect as DamageEffect;
+                    m_View.ShowPlayedCard(displayed.Id, displayed.DisplayName, displayed.Accent,
+                        damageEffect != null ? damageEffect.Damage : 1);
+                }
+            }
+
+            if (judgement != Judgement.Miss)
+            {
+                m_View.FlashLane(note.Lane, NoteStageView.ColorOf(judgement));
+            }
+
             bool accent = !string.IsNullOrEmpty(m_AccentCardId) && note.SourceCardId == m_AccentCardId;
             m_State.ApplyJudgement(judgement, DamageOf(note), accent);
         }
@@ -185,6 +205,26 @@ namespace CardRhythm.Rhythm
             }
 
             return cards;
+        }
+
+        private static List<CardDefinition> ResolveDeckCards(Dictionary<string, CardDefinition> all)
+        {
+            var result = new List<CardDefinition>();
+            foreach (string id in GameSettings.LoadDeck())
+            {
+                CardDefinition card;
+                if (all.TryGetValue(id, out card))
+                {
+                    result.Add(card);
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                result.AddRange(all.Values);
+            }
+
+            return result;
         }
 
         private static List<CardSpec> BuildDeck(List<CardDefinition> cards)
