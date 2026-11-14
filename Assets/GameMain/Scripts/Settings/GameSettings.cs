@@ -67,5 +67,25 @@ namespace CardRhythm.Settings
             PlayerPrefs.DeleteKey(DeckKey);
             PlayerPrefs.Save();
         }
+
+        /// <summary>向牌组追加一张（允许重复），达到上限返回 false。</summary>
+        public static bool AppendToDeck(string id, int maxCards = 20)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return false;
+            }
+
+            List<string> ids = LoadDeck();
+            if (ids.Count >= maxCards)
+            {
+                return false;
+            }
+
+            ids.Add(id);
+            PlayerPrefs.SetString(DeckKey, string.Join("|", ids));
+            PlayerPrefs.Save();
+            return true;
+        }
     }
 }

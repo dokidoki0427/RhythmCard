@@ -8,12 +8,12 @@ using UnityEngine.UI;
 namespace CardRhythm.UI
 {
     /// <summary>
-    /// 牌组界面：从全部卡牌里选 8 张，存 PlayerPrefs。
+    /// 牌组界面：从全部卡牌里选牌（上限 20 张），存 PlayerPrefs。
     /// 运行时用代码搭 UI，不依赖预制体布局。
     /// </summary>
     public sealed class DeckForm : UIFormBase
     {
-        private const int DeckSize = 8;
+        private const int DeckSize = 20;
         private const int Columns = 3;
 
         private readonly HashSet<string> m_Selected = new HashSet<string>();

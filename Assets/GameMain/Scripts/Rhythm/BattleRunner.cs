@@ -46,7 +46,7 @@ namespace CardRhythm.Rhythm
             List<CardSpec> deck = BuildDeck(deckCards);
             Chart = ChartGenerator.Generate(deck, bpm, bars);
 
-            m_State = new BattleState();
+            m_State = new BattleState(LoadEnemy());
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
             m_Audio = gameObject.AddComponent<LaneAudioPlayer>();
@@ -77,6 +77,7 @@ namespace CardRhythm.Rhythm
 
             float songTime = m_Conductor.SongTime;
             Judger.Update(songTime);
+            m_State.TickBar(Mathf.FloorToInt(songTime / (m_Conductor.SecondsPerBeat * 4f)));
 
             for (int lane = 0; lane < LaneKeys.Length; lane++)
             {
@@ -177,14 +178,20 @@ namespace CardRhythm.Rhythm
             style.fontSize = 22;
             style.normal.textColor = Color.white;
 
-            GUI.Label(new Rect(24f, 96f, 700f, 28f), "Player HP: " + m_State.DisplayPlayerHp + " / 100", style);
-            GUI.Label(new Rect(24f, 126f, 700f, 28f), "Enemy HP: " + m_State.DisplayEnemyHp + " / 300", style);
-            GUI.Label(new Rect(24f, 156f, 700f, 28f), "Combo: " + Judger.Combo + "   Score: " + m_State.Score, style);
-            GUI.Label(new Rect(24f, 186f, 700f, 28f), "Judged: " + Judger.Judged + " / " + Judger.Total + "   Miss: " + m_State.Miss, style);
+            GUI.Label(new Rect(24f, 96f, 700f, 28f), "Layer " + RunState.Layer + " / " + RunState.MaxLayer + "   " + m_State.Behavior, style);
+            GUI.Label(new Rect(24f, 126f, 700f, 28f), "Player HP: " + m_State.DisplayPlayerHp + " / 100", style);
+            GUI.Label(new Rect(24f, 156f, 700f, 28f), "Enemy HP: " + m_State.DisplayEnemyHp + " / " + Mathf.CeilToInt(m_State.MaxEnemyHp), style);
+            if (m_State.Behavior == EnemyBehavior.Shielded)
+            {
+                GUI.Label(new Rect(24f, 186f, 700f, 28f), "Shield: " + m_State.DisplayShieldHp + "  (only accent breaks it)", style);
+            }
+
+            GUI.Label(new Rect(24f, 216f, 700f, 28f), "Combo: " + Judger.Combo + "   Score: " + m_State.Score, style);
+            GUI.Label(new Rect(24f, 246f, 700f, 28f), "Judged: " + Judger.Judged + " / " + Judger.Total + "   Miss: " + m_State.Miss, style);
 
             if (!string.IsNullOrEmpty(m_AccentCardId))
             {
-                GUI.Label(new Rect(24f, 216f, 700f, 28f), "ACCENT armed: " + m_AccentCardId, style);
+                GUI.Label(new Rect(24f, 276f, 700f, 28f), "ACCENT armed: " + m_AccentCardId, style);
             }
         }
 
@@ -227,23 +234,39 @@ namespace CardRhythm.Rhythm
             return result;
         }
 
-        private static List<CardSpec> BuildDeck(List<CardDefinition> cards)
+        private static EnemyDefinition LoadEnemy()
         {
-            var deck = new List<CardSpec>(DeckSize);
-            if (cards.Count == 0)
+            string id = RunState.CurrentEnemyId;
+            if (string.IsNullOrEmpty(id))
             {
-                for (int i = 0; i < DeckSize; i++)
-                {
-                    deck.Add(new CardSpec("placeholder", 1, CardPattern.Sequence, 0, Color.white));
-                }
-
-                return deck;
+                return null;
             }
 
-            cards.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
-            for (int i = 0; i < DeckSize; i++)
+            var enemy = Resources.Load<EnemyDefinition>("Enemies/" + id);
+            if (enemy == null)
             {
-                CardDefinition card = cards[i % cards.Count];
+                Debug.LogWarning("[BATTLE] 找不到敌人模板 Resources/Enemies/" + id);
+            }
+
+            return enemy;
+        }
+
+        private static List<CardSpec> BuildDeck(List<CardDefinition> cards)
+        {
+            if (cards.Count == 0)
+            {
+                var fallback = new List<CardSpec>(DeckSize);
+                for (int i = 0; i < DeckSize; i++)
+                {
+                    fallback.Add(new CardSpec("placeholder", 1, CardPattern.Sequence, 0, Color.white));
+                }
+
+                return fallback;
+            }
+
+            var deck = new List<CardSpec>(cards.Count);
+            foreach (CardDefinition card in cards)
+            {
                 deck.Add(new CardSpec(card.Id, Mathf.Clamp(card.NoteCount, 1, 4), card.Pattern, card.EffectiveSeed, card.Accent));
             }
 

@@ -11,6 +11,7 @@ namespace CardRhythm.UI
         Result,
         Settings,
         Deck,
+        Reward,
     }
 
     /// <summary>一个界面的静态定义：资源路径 + 它该落在哪一层。</summary>
@@ -43,6 +44,7 @@ namespace CardRhythm.UI
             { UIFormId.Result, new UIFormDef(UIFormId.Result, UIFormRoot + "ResultForm.prefab", UILayer.Window) },
             { UIFormId.Settings, new UIFormDef(UIFormId.Settings, UIFormRoot + "SettingsForm.prefab", UILayer.Popup) },
             { UIFormId.Deck, new UIFormDef(UIFormId.Deck, UIFormRoot + "DeckForm.prefab", UILayer.Popup) },
+            { UIFormId.Reward, new UIFormDef(UIFormId.Reward, UIFormRoot + "RewardForm.prefab", UILayer.Window) },
         };
 
         public static UIFormDef Get(UIFormId id)

@@ -1,3 +1,4 @@
+using CardRhythm.Battle;
 using CardRhythm.UI;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
@@ -5,7 +6,7 @@ using UnityEngine;
 
 namespace CardRhythm.Procedure
 {
-    /// <summary>地图 / 选路：Space 进战斗；O 设置，B 牌组。</summary>
+    /// <summary>地图：Space 进入当前节点；事件节点直接推进；O 设置，B 牌组。</summary>
     public sealed class ProcedureMap : GameProcedureBase
     {
         protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
@@ -37,7 +38,35 @@ namespace CardRhythm.Procedure
 
         public override void RequestAdvance()
         {
+            if (RunState.CurrentNode == MapNodeType.Event)
+            {
+                // 事件层：原型期直接跳过（后续接事件内容），就地刷新地图。
+                RunState.Advance();
+                RefreshMapForm();
+                return;
+            }
+
             ChangeTo<ProcedureBattle>();
+        }
+
+        private static void RefreshMapForm()
+        {
+            var uiComponent = UnityGameFramework.Runtime.GameEntry.GetComponent<UnityGameFramework.Runtime.UIComponent>();
+            if (uiComponent == null)
+            {
+                return;
+            }
+
+            UIFormDef def = UIFormCatalog.Get(UIFormId.Map);
+            var form = uiComponent.GetUIForm(def.AssetPath);
+            if (form != null)
+            {
+                var mapForm = form.GetComponent<MapForm>();
+                if (mapForm != null)
+                {
+                    mapForm.Refresh();
+                }
+            }
         }
     }
 }

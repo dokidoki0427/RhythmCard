@@ -93,5 +93,38 @@ namespace CardRhythm.Tests.EditMode
             Assert.AreEqual(state.MaxCombo, result.MaxCombo);
             Assert.AreEqual(state.Perfect, result.Perfect);
         }
+
+        [Test]
+        public void Shield_IgnoresNormalHits()
+        {
+            var state = new BattleState(240f, 12f, 2, CardRhythm.Cards.EnemyBehavior.Shielded, 80f, 8, 0);
+            state.ApplyJudgement(Judgement.Perfect, 10f, false);
+
+            Assert.AreEqual(240f, state.EnemyHp, 0.001f, "护盾未破时普通命中无效");
+            Assert.AreEqual(80f, state.ShieldHp, 0.001f);
+        }
+
+        [Test]
+        public void Shield_BreaksWithAccentAndOverflows()
+        {
+            var state = new BattleState(240f, 12f, 2, CardRhythm.Cards.EnemyBehavior.Shielded, 12f, 8, 0);
+            state.ApplyJudgement(Judgement.Perfect, 10f, true);
+
+            Assert.AreEqual(0f, state.ShieldHp, 0.001f);
+            Assert.AreEqual(237f, state.EnemyHp, 0.001f, "护盾溢出伤害要打本体");
+        }
+
+        [Test]
+        public void Disruptor_TicksOncePerBar()
+        {
+            var state = new BattleState(260f, 8f, 1, CardRhythm.Cards.EnemyBehavior.Disruptor, 0f, 8, 6);
+
+            state.TickBar(8);
+            state.TickBar(8);
+            Assert.AreEqual(94f, state.PlayerHp, 0.001f, "同一小节只掉一次");
+
+            state.TickBar(16);
+            Assert.AreEqual(88f, state.PlayerHp, 0.001f);
+        }
     }
 }
