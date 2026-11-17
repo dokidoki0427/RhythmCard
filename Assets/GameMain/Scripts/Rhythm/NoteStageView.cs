@@ -37,7 +37,7 @@ namespace CardRhythm.Rhythm
 
         private const int MaxPlayedCards = 5;
         private const float PlayedCardHeight = 150f;
-        private const float TravelBeats = 4f;
+        private const float TravelBeats = 6f;
 
         private RectTransform m_CharacterPanel;
 
@@ -81,6 +81,15 @@ namespace CardRhythm.Rhythm
             scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
             scaler.matchWidthOrHeight = 0.5f;
             m_CanvasRoot = canvasObject.transform;
+
+            var backdrop = CreateRect(canvasObject.transform, "StageBackdrop");
+            backdrop.anchorMin = Vector2.zero;
+            backdrop.anchorMax = Vector2.one;
+            backdrop.offsetMin = Vector2.zero;
+            backdrop.offsetMax = Vector2.zero;
+            var backdropImage = backdrop.gameObject.AddComponent<Image>();
+            backdropImage.color = new Color(0.04f, 0.04f, 0.06f, 0.94f);
+            backdropImage.raycastTarget = false;
 
             m_CharacterPanel = BuildSidePanel(canvasObject.transform, "CharacterPanel", "CHARACTER", 0f, new Color(0.14f, 0.2f, 0.3f, 0.9f));
             RectTransform monsterPanel = BuildSidePanel(canvasObject.transform, "MonsterPanel", "MONSTER", ReferenceWidth - SidePanelWidth, new Color(0.3f, 0.14f, 0.16f, 0.9f));

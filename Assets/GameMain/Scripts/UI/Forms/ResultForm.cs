@@ -67,7 +67,7 @@ namespace CardRhythm.UI
                 parent = transform;
             }
 
-            m_ContinueButton = UIWidgets.Button(parent, "返回地图", new Vector2(320f, 72f), new Vector2(0f, -150f),
+            m_ContinueButton = UIWidgets.Button(parent, "返回地图", new Vector2(320f, 72f), new Vector2(0f, -260f),
                 Continue, SheetTheme.Gold, SheetTheme.Ink, 28);
         }
 

@@ -16,6 +16,20 @@ namespace CardRhythm.UI
             Bind("DeckButton", OpenDeck);
             Bind("SettingsButton", OpenSettings);
             Bind("QuitButton", Quit);
+            FixNoteHeads();
+        }
+
+        /// <summary>预制体里的音符头如果没有 Sprite 会显示成方块，运行时统一换成圆形。</summary>
+        private void FixNoteHeads()
+        {
+            foreach (Image image in GetComponentsInChildren<Image>(true))
+            {
+                if (image.gameObject.name == "NoteHead")
+                {
+                    image.sprite = SheetTheme.Circle;
+                    image.type = Image.Type.Simple;
+                }
+            }
         }
 
         private void Bind(string childName, System.Action action)

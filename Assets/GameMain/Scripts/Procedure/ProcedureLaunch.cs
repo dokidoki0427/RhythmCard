@@ -3,6 +3,7 @@ using GameFramework.Fsm;
 using GameFramework.Procedure;
 using UnityGameFramework.Runtime;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace CardRhythm.Procedure
 {
@@ -26,6 +27,20 @@ namespace CardRhythm.Procedure
             {
                 debugger.ActiveWindow = false;
             }
+
+            EnsureEventSystem();
+        }
+
+        /// <summary>Boot 场景没有 EventSystem 时 UI 点击全部失效，这里兜底创建。</summary>
+        private static void EnsureEventSystem()
+        {
+            if (Object.FindFirstObjectByType<EventSystem>() != null)
+            {
+                return;
+            }
+
+            var eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            Object.DontDestroyOnLoad(eventSystem);
         }
 
         protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)

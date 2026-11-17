@@ -15,14 +15,13 @@ namespace CardRhythm.Procedure
             if (m_Style == null)
             {
                 m_Style = new GUIStyle(GUI.skin.label);
-                m_Style.fontSize = 20;
-                m_Style.normal.textColor = Color.white;
+                m_Style.fontSize = 16;
+                m_Style.normal.textColor = new Color(1f, 1f, 1f, 0.45f);
             }
 
             GameProcedureBase current = GameProcedureBase.Current;
             string name = current != null ? current.GetType().Name : "(none)";
-            float y = Screen.height - 66f;
-            GUI.Label(new Rect(24f, y, 900f, 30f), "Procedure: " + name + "    [Space] next", m_Style);
+            GUI.Label(new Rect(Screen.width - 340f, 8f, 330f, 24f), name + "   [Space]", m_Style);
         }
     }
 }

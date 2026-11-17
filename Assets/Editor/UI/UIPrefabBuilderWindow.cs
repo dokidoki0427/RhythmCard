@@ -265,8 +265,10 @@ namespace CardRhythm.EditorUI
             Color background, Color textColor, int fontSize)
         {
             var rect = Rect(parent, name, size, position, background);
+            var image = rect.GetComponent<Image>();
+            image.raycastTarget = true; // 按钮必须可接收射线，否则点不动
             var button = rect.gameObject.AddComponent<Button>();
-            button.targetGraphic = rect.GetComponent<Image>();
+            button.targetGraphic = image;
 
             var text = Text(rect, "Label", label, fontSize, Vector2.zero, size, textColor);
             text.raycastTarget = false;
@@ -285,6 +287,10 @@ namespace CardRhythm.EditorUI
         private static void Note(Transform parent, Vector2 position, float size, Color color)
         {
             var head = Rect(parent, "NoteHead", new Vector2(size, size * 0.78f), position, color);
+            var headImage = head.GetComponent<Image>();
+            headImage.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
+            headImage.type = Image.Type.Simple;
+
             var stem = Rect(parent, "Stem", new Vector2(3f, size * 2.2f), position + new Vector2(size * 0.45f, size * 1.1f), color);
             stem.pivot = new Vector2(0f, 1f);
         }
