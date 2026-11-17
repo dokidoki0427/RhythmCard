@@ -32,24 +32,29 @@ namespace CardRhythm.UI
             var panel = transform.Find("Panel") as RectTransform;
             if (panel == null)
             {
-                panel = UIWidgets.Panel(transform, "PausePanel", new Vector2(720f, 560f), Vector2.zero,
-                    new Color(0.08f, 0.09f, 0.12f, 0.98f));
+                panel = UIWidgets.Panel(transform, "PausePanel", new Vector2(720f, 560f), Vector2.zero, SheetTheme.Parchment);
             }
 
-            UIWidgets.Label(panel, "PAUSED", 46, TextAnchor.MiddleCenter, Color.white,
+            var panelImage = panel.GetComponent<Image>();
+            if (panelImage != null)
+            {
+                panelImage.color = SheetTheme.Parchment;
+            }
+
+            UIWidgets.Label(panel, "暂 停", 46, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(600f, 70f), new Vector2(0f, 190f));
 
             UIWidgets.Label(panel, "第 " + CardRhythm.Battle.RunState.Layer + " 层 / " + CardRhythm.Battle.RunState.MaxLayer
                     + "   ·   牌组 " + CardRhythm.Settings.GameSettings.LoadDeck().Count + " 张",
-                24, TextAnchor.MiddleCenter, new Color(0.8f, 0.8f, 0.8f),
+                24, TextAnchor.MiddleCenter, SheetTheme.InkSoft,
                 new Vector2(600f, 40f), new Vector2(0f, 138f));
 
             UIWidgets.Button(panel, "继续", new Vector2(360f, 66f), new Vector2(0f, 70f), Close,
-                new Color(0.22f, 0.32f, 0.28f));
+                SheetTheme.Ink, SheetTheme.Parchment, 28);
             UIWidgets.Button(panel, "设置", new Vector2(360f, 66f), new Vector2(0f, -20f), OpenSettings,
-                new Color(0.2f, 0.24f, 0.32f));
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 26);
             UIWidgets.Button(panel, "退出到菜单", new Vector2(360f, 66f), new Vector2(0f, -110f), QuitToMenu,
-                new Color(0.32f, 0.2f, 0.2f));
+                SheetTheme.Crimson, SheetTheme.Parchment, 26);
         }
 
         private void OpenSettings()

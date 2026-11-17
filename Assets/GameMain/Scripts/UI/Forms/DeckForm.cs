@@ -50,24 +50,31 @@ namespace CardRhythm.UI
             var panel = transform.Find("Panel") as RectTransform;
             if (panel == null)
             {
-                panel = UIWidgets.Panel(transform, "DeckPanel", new Vector2(1240f, 820f), Vector2.zero,
-                    new Color(0.09f, 0.1f, 0.13f, 0.98f));
+                panel = UIWidgets.Panel(transform, "DeckPanel", new Vector2(1240f, 820f), Vector2.zero, SheetTheme.Parchment);
             }
 
-            UIWidgets.Label(panel, "DECK", 44, TextAnchor.MiddleCenter, Color.white,
+            var panelImage = panel.GetComponent<Image>();
+            if (panelImage != null)
+            {
+                panelImage.color = SheetTheme.Parchment;
+            }
+
+            UIWidgets.Label(panel, "牌 组", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(800f, 60f), new Vector2(0f, 350f));
 
-            m_CountLabel = UIWidgets.Label(panel, "0 / 8", 28, TextAnchor.MiddleCenter,
-                new Color(0.9f, 0.85f, 0.6f), new Vector2(400f, 40f), new Vector2(0f, 300f));
+            m_CountLabel = UIWidgets.Label(panel, "0 / 20", 28, TextAnchor.MiddleCenter,
+                SheetTheme.Crimson, new Vector2(400f, 40f), new Vector2(0f, 300f));
 
             m_Grid = UIWidgets.Panel(panel, "Grid", new Vector2(1180f, 560f), new Vector2(0f, 20f),
                 new Color(0f, 0f, 0f, 0f));
 
             m_StatusLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
-                new Color(0.8f, 0.8f, 0.8f), new Vector2(800f, 40f), new Vector2(0f, -300f));
+                SheetTheme.InkSoft, new Vector2(800f, 40f), new Vector2(0f, -300f));
 
-            UIWidgets.Button(panel, "保存", new Vector2(200f, 60f), new Vector2(-120f, -360f), Save, new Color(0.24f, 0.34f, 0.2f));
-            UIWidgets.Button(panel, "关闭", new Vector2(200f, 60f), new Vector2(120f, -360f), Close, new Color(0.3f, 0.3f, 0.34f));
+            UIWidgets.Button(panel, "保存", new Vector2(200f, 60f), new Vector2(-120f, -360f), Save,
+                SheetTheme.Ink, SheetTheme.Parchment, 26);
+            UIWidgets.Button(panel, "关闭", new Vector2(200f, 60f), new Vector2(120f, -360f), Close,
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
         }
 
         private void LoadSelection()
@@ -125,9 +132,11 @@ namespace CardRhythm.UI
                 int damage = damageEffect != null ? damageEffect.Damage : 0;
                 string label = card.DisplayName + "\n" + card.NoteCount + " 音 · " + damage + " 伤";
 
-                Color color = selected ? card.Accent : new Color(0.2f, 0.21f, 0.25f, 1f);
+                Color color = selected ? card.Accent : SheetTheme.ParchmentDark;
+                Color textColor = selected ? SheetTheme.Ink : new Color(0.35f, 0.30f, 0.24f, 1f);
                 string id = card.Id;
-                UIWidgets.Button(m_Grid, label, new Vector2(350f, 110f), new Vector2(x, y), () => Toggle(id), color);
+                UIWidgets.Button(m_Grid, label, new Vector2(350f, 110f), new Vector2(x, y), () => Toggle(id),
+                    color, textColor, 26);
             }
 
             if (m_CountLabel != null)

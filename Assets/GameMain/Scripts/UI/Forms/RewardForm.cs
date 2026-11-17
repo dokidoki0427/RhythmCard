@@ -41,20 +41,25 @@ namespace CardRhythm.UI
             m_Panel = transform.Find("Panel") as RectTransform;
             if (m_Panel == null)
             {
-                m_Panel = UIWidgets.Panel(transform, "RewardPanel", new Vector2(1240f, 820f), Vector2.zero,
-                    new Color(0.08f, 0.09f, 0.12f, 0.98f));
+                m_Panel = UIWidgets.Panel(transform, "RewardPanel", new Vector2(1240f, 820f), Vector2.zero, SheetTheme.Parchment);
             }
 
-            UIWidgets.Label(m_Panel, "CHOOSE A CARD", 44, TextAnchor.MiddleCenter, Color.white,
+            var panelImage = m_Panel.GetComponent<Image>();
+            if (panelImage != null)
+            {
+                panelImage.color = SheetTheme.Parchment;
+            }
+
+            UIWidgets.Label(m_Panel, "选 择 一 张 牌", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(900f, 60f), new Vector2(0f, 340f));
-            UIWidgets.Label(m_Panel, "点击一张加入牌组（可跳过）", 24, TextAnchor.MiddleCenter,
-                new Color(0.8f, 0.8f, 0.8f), new Vector2(900f, 40f), new Vector2(0f, 290f));
+            UIWidgets.Label(m_Panel, "点击加入牌组 · 也可以跳过", 24, TextAnchor.MiddleCenter,
+                SheetTheme.InkSoft, new Vector2(900f, 40f), new Vector2(0f, 290f));
 
             m_Slots = UIWidgets.Panel(m_Panel, "Slots", new Vector2(1180f, 440f), new Vector2(0f, 20f),
                 new Color(0f, 0f, 0f, 0f));
 
             UIWidgets.Button(m_Panel, "跳过", new Vector2(200f, 60f), new Vector2(0f, -330f), Close,
-                new Color(0.3f, 0.3f, 0.34f));
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
         }
 
         private void Refresh()
@@ -94,8 +99,9 @@ namespace CardRhythm.UI
                     + "\n\n" + card.Pattern;
 
                 string id = card.Id;
-                Color background = new Color(card.Accent.r * 0.45f, card.Accent.g * 0.45f, card.Accent.b * 0.45f, 1f);
-                UIWidgets.Button(m_Slots, label, new Vector2(340f, 400f), new Vector2(x, 0f), () => Pick(id), background);
+                Color background = card.Accent;
+                UIWidgets.Button(m_Slots, label, new Vector2(340f, 400f), new Vector2(x, 0f), () => Pick(id),
+                    background, SheetTheme.Ink, 28);
             }
         }
 

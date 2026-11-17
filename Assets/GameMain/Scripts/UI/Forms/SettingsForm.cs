@@ -122,40 +122,49 @@ namespace CardRhythm.UI
             var panel = transform.Find("Panel") as RectTransform;
             if (panel == null)
             {
-                panel = UIWidgets.Panel(transform, "SettingsPanel", new Vector2(920f, 620f), Vector2.zero,
-                    new Color(0.1f, 0.11f, 0.14f, 0.98f));
+                panel = UIWidgets.Panel(transform, "SettingsPanel", new Vector2(920f, 620f), Vector2.zero, SheetTheme.Parchment);
             }
 
-            UIWidgets.Label(panel, "SETTINGS", 44, TextAnchor.MiddleCenter, Color.white,
+            var panelImage = panel.GetComponent<Image>();
+            if (panelImage != null)
+            {
+                panelImage.color = SheetTheme.Parchment;
+            }
+
+            UIWidgets.Label(panel, "设 置", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(800f, 60f), new Vector2(0f, 250f));
 
             m_OffsetLabel = UIWidgets.Label(panel, "OFFSET 0 ms", 32, TextAnchor.MiddleCenter,
-                new Color(0.9f, 0.85f, 0.6f), new Vector2(800f, 50f), new Vector2(0f, 170f));
+                SheetTheme.Crimson, new Vector2(800f, 50f), new Vector2(0f, 170f));
 
-            UIWidgets.Button(panel, "-50", new Vector2(120f, 60f), new Vector2(-270f, 110f), () => AdjustOffset(-50), new Color(0.22f, 0.24f, 0.3f));
-            UIWidgets.Button(panel, "-10", new Vector2(120f, 60f), new Vector2(-135f, 110f), () => AdjustOffset(-10), new Color(0.22f, 0.24f, 0.3f));
-            UIWidgets.Button(panel, "+10", new Vector2(120f, 60f), new Vector2(0f, 110f), () => AdjustOffset(10), new Color(0.22f, 0.24f, 0.3f));
-            UIWidgets.Button(panel, "+50", new Vector2(120f, 60f), new Vector2(135f, 110f), () => AdjustOffset(50), new Color(0.22f, 0.24f, 0.3f));
-            UIWidgets.Button(panel, "0", new Vector2(120f, 60f), new Vector2(270f, 110f), () => SetOffset(0), new Color(0.3f, 0.2f, 0.2f));
+            UIWidgets.Button(panel, "-50", new Vector2(120f, 60f), new Vector2(-270f, 110f), () => AdjustOffset(-50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "-10", new Vector2(120f, 60f), new Vector2(-135f, 110f), () => AdjustOffset(-10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+10", new Vector2(120f, 60f), new Vector2(0f, 110f), () => AdjustOffset(10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+50", new Vector2(120f, 60f), new Vector2(135f, 110f), () => AdjustOffset(50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "0", new Vector2(120f, 60f), new Vector2(270f, 110f), () => SetOffset(0), SheetTheme.Crimson, SheetTheme.Parchment, 24);
 
-            UIWidgets.Label(panel, "KEYS", 26, TextAnchor.MiddleCenter, new Color(0.75f, 0.75f, 0.75f),
+            UIWidgets.Label(panel, "键 位", 26, TextAnchor.MiddleCenter, SheetTheme.InkSoft,
                 new Vector2(200f, 40f), new Vector2(0f, 55f));
             for (int lane = 0; lane < 4; lane++)
             {
                 int captured = lane;
                 float x = (lane - 1.5f) * 170f;
-                UIWidgets.Button(panel, "轨 " + lane, new Vector2(150f, 58f), new Vector2(x, 5f), () => BeginRebind(captured), new Color(0.2f, 0.22f, 0.28f));
-                m_KeyLabels[lane] = UIWidgets.Label(panel, "-", 24, TextAnchor.MiddleCenter, Color.white,
+                UIWidgets.Button(panel, "轨 " + lane, new Vector2(150f, 58f), new Vector2(x, 5f), () => BeginRebind(captured),
+                    SheetTheme.ParchmentDark, SheetTheme.Ink, 22);
+                m_KeyLabels[lane] = UIWidgets.Label(panel, "-", 24, TextAnchor.MiddleCenter, SheetTheme.Ink,
                     new Vector2(150f, 30f), new Vector2(x, -32f));
             }
 
-            UIWidgets.Button(panel, "试听节拍", new Vector2(220f, 60f), new Vector2(-130f, -85f), PlayMetronome, new Color(0.18f, 0.28f, 0.36f));
-            UIWidgets.Button(panel, "自动校准 (敲 8 次)", new Vector2(300f, 60f), new Vector2(150f, -85f), BeginCalibration, new Color(0.24f, 0.34f, 0.2f));
+            UIWidgets.Button(panel, "试听节拍", new Vector2(220f, 60f), new Vector2(-130f, -85f), PlayMetronome,
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "自动校准 (敲 8 次)", new Vector2(300f, 60f), new Vector2(150f, -85f), BeginCalibration,
+                SheetTheme.Gold, SheetTheme.Ink, 24);
 
             m_StatusLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
-                new Color(0.8f, 0.8f, 0.8f), new Vector2(800f, 70f), new Vector2(0f, -150f));
+                SheetTheme.InkSoft, new Vector2(800f, 70f), new Vector2(0f, -150f));
 
-            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -235f), Close, new Color(0.3f, 0.3f, 0.34f));
+            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -235f), Close,
+                SheetTheme.Ink, SheetTheme.Parchment, 24);
         }
 
         private void AdjustOffset(int delta)
