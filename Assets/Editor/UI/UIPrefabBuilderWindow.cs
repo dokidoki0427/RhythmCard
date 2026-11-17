@@ -201,6 +201,12 @@ namespace CardRhythm.EditorUI
             backdrop.sizeDelta = Vector2.zero;
 
             var panel = Rect(root.transform, "Panel", panelSize, Vector2.zero, panelColor);
+            var panelImage = panel.GetComponent<Image>();
+            panelImage.sprite = Resources.Load<Sprite>("UI/PanelFrame");
+            if (panelImage.sprite != null)
+            {
+                panelImage.type = Image.Type.Sliced;
+            }
 
             var content = Rect(panel, "Content", new Vector2(panelSize.x - 80f, panelSize.y - 120f), new Vector2(0f, -10f), new Color(0f, 0f, 0f, 0f));
             content.name = "Content";
@@ -276,6 +282,12 @@ namespace CardRhythm.EditorUI
             var rect = Rect(parent, name, size, position, background);
             var image = rect.GetComponent<Image>();
             image.raycastTarget = true; // 按钮必须可接收射线，否则点不动
+            image.sprite = Resources.Load<Sprite>("UI/ButtonFrame");
+            if (image.sprite != null)
+            {
+                image.type = Image.Type.Sliced;
+            }
+
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
 
@@ -297,11 +309,18 @@ namespace CardRhythm.EditorUI
         {
             var head = Rect(parent, "NoteHead", new Vector2(size, size * 0.78f), position, color);
             var headImage = head.GetComponent<Image>();
-            headImage.sprite = UISpriteSetup.EnsureCircle();
+            headImage.sprite = Resources.Load<Sprite>("UI/NoteHead") ?? UISpriteSetup.EnsureCircle();
             headImage.type = Image.Type.Simple;
             headImage.preserveAspect = true;
 
-            var stem = Rect(parent, "Stem", new Vector2(3f, size * 2.2f), position + new Vector2(size * 0.45f, size * 1.1f), color);
+            var stem = Rect(parent, "Stem", new Vector2(4f, size * 2.2f), position + new Vector2(size * 0.45f, size * 1.1f), color);
+            var stemImage = stem.GetComponent<Image>();
+            stemImage.sprite = Resources.Load<Sprite>("UI/Stem");
+            if (stemImage.sprite != null)
+            {
+                stemImage.type = Image.Type.Sliced;
+            }
+
             stem.pivot = new Vector2(0f, 1f);
         }
     }

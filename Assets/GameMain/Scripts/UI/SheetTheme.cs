@@ -39,6 +39,12 @@ namespace CardRhythm.UI
         {
             get
             {
+                Sprite asset = Load("UI/Circle");
+                if (asset != null)
+                {
+                    return asset;
+                }
+
                 if (s_Circle == null)
                 {
                     s_Circle = CreateCircleSprite(64);
@@ -46,6 +52,46 @@ namespace CardRhythm.UI
 
                 return s_Circle;
             }
+        }
+
+        public static Sprite NoteHead
+        {
+            get { return Load("UI/NoteHead") ?? Circle; }
+        }
+
+        public static Sprite NoteHeadOutline
+        {
+            get { return Load("UI/NoteHeadOutline") ?? Circle; }
+        }
+
+        public static Sprite Stem
+        {
+            get { return Load("UI/Stem"); }
+        }
+
+        public static Sprite ButtonFrame
+        {
+            get { return Load("UI/ButtonFrame"); }
+        }
+
+        public static Sprite PanelFrame
+        {
+            get { return Load("UI/PanelFrame"); }
+        }
+
+        public static Sprite CardFrame
+        {
+            get { return Load("UI/CardFrame"); }
+        }
+
+        public static Sprite BarFrame
+        {
+            get { return Load("UI/BarFrame"); }
+        }
+
+        private static Sprite Load(string path)
+        {
+            return Resources.Load<Sprite>(path);
         }
 
         public static void Fill(Transform parent, string name, Vector2 size, Vector2 position, Color color)
@@ -80,16 +126,23 @@ namespace CardRhythm.UI
             head.anchoredPosition = position;
 
             var image = head.gameObject.AddComponent<Image>();
-            image.sprite = Circle;
+            image.sprite = NoteHead;
+            image.preserveAspect = true;
             image.color = color;
             image.raycastTarget = false;
 
             var stem = CreateRect(parent, "Stem");
             stem.anchorMin = new Vector2(0.5f, 0.5f);
             stem.anchorMax = new Vector2(0.5f, 0.5f);
-            stem.sizeDelta = new Vector2(3f, size * 2.2f);
+            stem.sizeDelta = new Vector2(4f, size * 2.2f);
             stem.anchoredPosition = position + new Vector2(size * 0.45f, size * 1.1f);
             var stemImage = stem.gameObject.AddComponent<Image>();
+            if (Stem != null)
+            {
+                stemImage.sprite = Stem;
+                stemImage.type = Image.Type.Sliced;
+            }
+
             stemImage.color = color;
             stemImage.raycastTarget = false;
 

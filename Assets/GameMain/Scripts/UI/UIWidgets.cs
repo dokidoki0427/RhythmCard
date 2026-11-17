@@ -35,6 +35,12 @@ namespace CardRhythm.UI
 
             var image = go.AddComponent<Image>();
             image.color = color;
+            if (SheetTheme.PanelFrame != null)
+            {
+                image.sprite = SheetTheme.PanelFrame;
+                image.type = Image.Type.Sliced;
+            }
+
             return rect;
         }
 
@@ -74,6 +80,11 @@ namespace CardRhythm.UI
 
             var image = go.AddComponent<Image>();
             image.color = background;
+            if (SheetTheme.ButtonFrame != null)
+            {
+                image.sprite = SheetTheme.ButtonFrame;
+                image.type = Image.Type.Sliced;
+            }
 
             var button = go.AddComponent<Button>();
             button.targetGraphic = image;
