@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using CardRhythm.UI;
 using UnityEditor;
@@ -177,7 +177,7 @@ namespace CardRhythm.EditorUI
             }
         }
 
-        private static Type FormTypeOf(UIFormId id)
+        public static Type FormTypeOf(UIFormId id)
         {
             switch (id)
             {

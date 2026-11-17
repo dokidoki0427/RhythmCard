@@ -47,9 +47,12 @@ namespace CardRhythm.UI
 
         private void BuildUi()
         {
-            UIWidgets.Backdrop(transform);
-            var panel = UIWidgets.Panel(transform, "DeckPanel", new Vector2(1240f, 820f), Vector2.zero,
-                new Color(0.09f, 0.1f, 0.13f, 0.98f));
+            var panel = transform.Find("Panel") as RectTransform;
+            if (panel == null)
+            {
+                panel = UIWidgets.Panel(transform, "DeckPanel", new Vector2(1240f, 820f), Vector2.zero,
+                    new Color(0.09f, 0.1f, 0.13f, 0.98f));
+            }
 
             UIWidgets.Label(panel, "DECK", 44, TextAnchor.MiddleCenter, Color.white,
                 new Vector2(800f, 60f), new Vector2(0f, 350f));

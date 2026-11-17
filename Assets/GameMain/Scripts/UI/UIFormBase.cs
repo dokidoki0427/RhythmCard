@@ -1,5 +1,6 @@
 using UnityGameFramework.Runtime;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CardRhythm.UI
 {
@@ -33,6 +34,16 @@ namespace CardRhythm.UI
         {
             base.OnOpen(userData);
             StretchToScreen();
+            ApplyRuntimeFont();
+        }
+
+        /// <summary>预制体里的文字用内置字体（避免资源依赖），运行时统一换成系统中文字体。</summary>
+        public void ApplyRuntimeFont()
+        {
+            foreach (Text text in GetComponentsInChildren<Text>(true))
+            {
+                text.font = SheetTheme.MainFont;
+            }
         }
 
         /// <summary>

@@ -38,9 +38,12 @@ namespace CardRhythm.UI
 
         private void BuildUi()
         {
-            UIWidgets.Backdrop(transform);
-            m_Panel = UIWidgets.Panel(transform, "RewardPanel", new Vector2(1240f, 820f), Vector2.zero,
-                new Color(0.08f, 0.09f, 0.12f, 0.98f));
+            m_Panel = transform.Find("Panel") as RectTransform;
+            if (m_Panel == null)
+            {
+                m_Panel = UIWidgets.Panel(transform, "RewardPanel", new Vector2(1240f, 820f), Vector2.zero,
+                    new Color(0.08f, 0.09f, 0.12f, 0.98f));
+            }
 
             UIWidgets.Label(m_Panel, "CHOOSE A CARD", 44, TextAnchor.MiddleCenter, Color.white,
                 new Vector2(900f, 60f), new Vector2(0f, 340f));
