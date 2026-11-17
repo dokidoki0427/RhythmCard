@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Id: attacker
   m_DisplayName: "\u8BAD\u7EC3\u6728\u6869"
-  m_MaxHp: 300
+  m_MaxHp: 10
   m_Attack: 10
   m_NonPerfectPerAttack: 2
   m_Behavior: 0

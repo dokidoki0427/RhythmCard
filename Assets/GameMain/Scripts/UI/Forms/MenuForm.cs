@@ -28,6 +28,7 @@ namespace CardRhythm.UI
                 {
                     image.sprite = SheetTheme.Circle;
                     image.type = Image.Type.Simple;
+                    image.preserveAspect = true;
                 }
             }
         }

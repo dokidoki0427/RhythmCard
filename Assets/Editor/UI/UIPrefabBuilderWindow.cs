@@ -124,7 +124,7 @@ namespace CardRhythm.EditorUI
             float[] noteY = { 201f, 235f, 269f, 167f, 303f };
             for (int i = 0; i < noteX.Length; i++)
             {
-                Note(root.transform, new Vector2(noteX[i], noteY[i]), 26f, SheetTheme.Ink);
+                Note(root.transform, new Vector2(noteX[i], noteY[i]), 34f, SheetTheme.Ink);
             }
 
             Rect(root.transform, "Rule", new Vector2(760f, 2f), new Vector2(0f, 130f), new Color(0.15f, 0.13f, 0.11f, 0.25f));
@@ -167,9 +167,18 @@ namespace CardRhythm.EditorUI
         private static GameObject BuildResult(UIFormDef def)
         {
             var root = CreateRoot(def, "ResultForm", new Color(0.06f, 0.09f, 0.13f, 0.92f));
-            Text(root.transform, "Title", "RESULT", 44, new Vector2(0f, 40f), new Vector2(900f, 120f), Color.white);
-            Text(root.transform, "Hint", string.Empty, 28, new Vector2(0f, -120f), new Vector2(1000f, 260f), new Color(0.9f, 0.9f, 0.9f));
-            Rect(root.transform, "Content", new Vector2(1200f, 300f), new Vector2(0f, -20f), new Color(0f, 0f, 0f, 0f));
+
+            Text(root.transform, "Title", "RESULT", 72, new Vector2(0f, 430f), new Vector2(900f, 120f), SheetTheme.Gold);
+            Text(root.transform, "Score", "SCORE 0", 36, new Vector2(0f, 318f), new Vector2(800f, 50f), Color.white);
+            Text(root.transform, "Combo", "MAX COMBO 0", 30, new Vector2(0f, 252f), new Vector2(800f, 44f), new Color(0.85f, 0.85f, 0.85f));
+            Text(root.transform, "Judgement", "PERFECT 0    GOOD 0    BAD 0    MISS 0", 28,
+                new Vector2(0f, 190f), new Vector2(1200f, 44f), new Color(0.85f, 0.85f, 0.85f));
+            Text(root.transform, "Accuracy", "ACCURACY 0.0%", 32, new Vector2(0f, 122f), new Vector2(800f, 46f), SheetTheme.Gold);
+
+            Button(root.transform, "ContinueButton", "返回地图", new Vector2(320f, 76f), new Vector2(0f, -40f),
+                SheetTheme.Gold, SheetTheme.Ink, 28);
+
+            Rect(root.transform, "Content", new Vector2(1200f, 260f), new Vector2(0f, -260f), new Color(0f, 0f, 0f, 0f));
             return root;
         }
 
@@ -288,8 +297,9 @@ namespace CardRhythm.EditorUI
         {
             var head = Rect(parent, "NoteHead", new Vector2(size, size * 0.78f), position, color);
             var headImage = head.GetComponent<Image>();
-            headImage.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
+            headImage.sprite = UISpriteSetup.EnsureCircle();
             headImage.type = Image.Type.Simple;
+            headImage.preserveAspect = true;
 
             var stem = Rect(parent, "Stem", new Vector2(3f, size * 2.2f), position + new Vector2(size * 0.45f, size * 1.1f), color);
             stem.pivot = new Vector2(0f, 1f);

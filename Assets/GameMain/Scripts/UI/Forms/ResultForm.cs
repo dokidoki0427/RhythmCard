@@ -5,70 +5,69 @@ using UnityEngine.UI;
 namespace CardRhythm.UI
 {
     /// <summary>
-    /// 结算界面：大标题 + 数据明细 + 返回按钮。
+    /// 结算界面。布局在预制体里（标题 / 分数 / 连击 / 判定分布 / 准确率 / 返回按钮），
+    /// 脚本只负责按名字填文字。
     /// </summary>
     public sealed class ResultForm : UIFormBase
     {
-        private Button m_ContinueButton;
-
         protected override void OnOpen(object userData)
         {
             base.OnOpen(userData);
 
             var result = userData as BattleResult;
-            var title = FindText("Title");
-            var hint = FindText("Hint");
-            EnsureContinueButton();
+            BindContinue();
 
             if (result == null)
             {
-                if (title != null)
-                {
-                    title.text = "RESULT";
-                    title.fontSize = 64;
-                }
-
-                if (hint != null)
-                {
-                    hint.text = "no battle data";
-                }
-
+                SetText("Title", "RESULT");
                 return;
             }
 
+            Text title = FindText("Title");
             if (title != null)
             {
                 title.text = result.Victory ? "VICTORY" : "DEFEAT";
-                title.fontSize = 72;
                 title.color = result.Victory ? SheetTheme.Gold : new Color(0.9f, 0.35f, 0.35f);
             }
 
-            if (hint != null)
-            {
-                hint.fontSize = 30;
-                hint.text = "SCORE  " + result.Score
-                    + "\n\nMAX COMBO  " + result.MaxCombo
-                    + "\n\nPERFECT " + result.Perfect + "    GOOD " + result.Good
-                    + "    BAD " + result.Bad + "    MISS " + result.Miss
-                    + "\n\nACCURACY  " + (result.Accuracy * 100f).ToString("F1") + "%";
-            }
+            SetText("Score", "SCORE  " + result.Score);
+            SetText("Combo", "MAX COMBO  " + result.MaxCombo);
+            SetText("Judgement", "PERFECT " + result.Perfect + "    GOOD " + result.Good
+                + "    BAD " + result.Bad + "    MISS " + result.Miss);
+            SetText("Accuracy", "ACCURACY  " + (result.Accuracy * 100f).ToString("F1") + "%");
         }
 
-        private void EnsureContinueButton()
+        private void BindContinue()
         {
-            if (m_ContinueButton != null)
+            Transform child = transform.Find("ContinueButton");
+            if (child == null)
             {
                 return;
             }
 
-            Transform parent = transform.Find("Content");
-            if (parent == null)
+            var button = child.GetComponent<Button>();
+            if (button == null)
             {
-                parent = transform;
+                return;
             }
 
-            m_ContinueButton = UIWidgets.Button(parent, "返回地图", new Vector2(320f, 72f), new Vector2(0f, -260f),
-                Continue, SheetTheme.Gold, SheetTheme.Ink, 28);
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(Continue);
+        }
+
+        private void SetText(string childName, string value)
+        {
+            Text text = FindText(childName);
+            if (text != null)
+            {
+                text.text = value;
+            }
+        }
+
+        private Text FindText(string childName)
+        {
+            Transform child = transform.Find(childName);
+            return child != null ? child.GetComponent<Text>() : null;
         }
 
         private static void Continue()
@@ -78,12 +77,6 @@ namespace CardRhythm.UI
             {
                 procedure.RequestAdvance();
             }
-        }
-
-        private Text FindText(string childName)
-        {
-            Transform child = transform.Find(childName);
-            return child != null ? child.GetComponent<Text>() : null;
         }
     }
 }
