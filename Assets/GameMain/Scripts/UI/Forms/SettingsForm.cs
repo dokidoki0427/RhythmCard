@@ -119,6 +119,7 @@ namespace CardRhythm.UI
 
         private void BuildUi()
         {
+            UIWidgets.Backdrop(transform);
             var panel = UIWidgets.Panel(transform, "SettingsPanel", new Vector2(920f, 620f), Vector2.zero,
                 new Color(0.1f, 0.11f, 0.14f, 0.98f));
 

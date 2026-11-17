@@ -4,11 +4,13 @@ using UnityEngine.UI;
 
 namespace CardRhythm.UI
 {
-    /// <summary>地图：显示 8 层进度与当前节点，Space 进入下一层。</summary>
+    /// <summary>
+    /// 地图：一条横向五线谱，8 个音符代表 8 层。
+    /// 已完成为暗色、当前为金色并带光环、未来为浅色；点击当前音符进入。
+    /// </summary>
     public sealed class MapForm : UIFormBase
     {
-        private RectTransform m_Panel;
-        private RectTransform m_Rows;
+        private RectTransform m_Root;
         private bool m_Built;
 
         protected override void OnOpen(object userData)
@@ -20,61 +22,149 @@ namespace CardRhythm.UI
                 m_Built = true;
             }
 
+            var background = GetComponent<Image>();
+            if (background != null)
+            {
+                background.color = SheetTheme.Smoke;
+            }
+
+            HideTemplateChild("Title");
+            HideTemplateChild("Hint");
             Refresh();
         }
 
         private void BuildUi()
         {
-            m_Panel = UIWidgets.Panel(transform, "MapPanel", new Vector2(1100f, 900f), Vector2.zero,
-                new Color(0.07f, 0.08f, 0.11f, 0.97f));
-
-            UIWidgets.Label(m_Panel, "MAP", 44, TextAnchor.MiddleCenter, Color.white,
-                new Vector2(800f, 60f), new Vector2(0f, 390f));
-
-            m_Rows = UIWidgets.Panel(m_Panel, "Rows", new Vector2(900f, 700f), new Vector2(0f, 0f),
-                new Color(0f, 0f, 0f, 0f));
-
-            UIWidgets.Label(m_Panel, "Space 进入下一层", 24, TextAnchor.MiddleCenter,
-                new Color(0.8f, 0.8f, 0.8f), new Vector2(800f, 40f), new Vector2(0f, -400f));
+            m_Root = SheetTheme.CreateRect(transform, "MapRoot");
+            m_Root.anchorMin = Vector2.zero;
+            m_Root.anchorMax = Vector2.one;
+            m_Root.sizeDelta = Vector2.zero;
+            m_Root.anchoredPosition = Vector2.zero;
         }
 
         public void Refresh()
         {
-            for (int i = m_Rows.childCount - 1; i >= 0; i--)
+            for (int i = m_Root.childCount - 1; i >= 0; i--)
             {
-                Destroy(m_Rows.GetChild(i).gameObject);
+                Destroy(m_Root.GetChild(i).gameObject);
             }
+
+            UIWidgets.Label(m_Root, "行 板", 54, TextAnchor.MiddleCenter, SheetTheme.Gold,
+                new Vector2(600f, 70f), new Vector2(0f, 400f));
+            UIWidgets.Label(m_Root, "第 " + RunState.Layer + " 层 / " + RunState.MaxLayer + "   ·   " + NodeName(RunState.CurrentNode),
+                28, TextAnchor.MiddleCenter, new Color(0.95f, 0.90f, 0.80f, 0.75f),
+                new Vector2(900f, 40f), new Vector2(0f, 345f));
+
+            // 横向五线谱
+            SheetTheme.Staff(m_Root, new Vector2(0f, 0f), 1560f, 30f, new Color(0.78f, 0.62f, 0.24f, 0.45f));
+
+            // 连接线（谱线中央的一条细线）
+            SheetTheme.Fill(m_Root, "Path", new Vector2(1500f, 1f), new Vector2(0f, 0f), new Color(0.78f, 0.62f, 0.24f, 0.25f));
 
             for (int layer = 1; layer <= RunState.MaxLayer; layer++)
             {
-                MapNodeType type = RunState.Nodes[layer - 1];
-                bool current = layer == RunState.Layer;
-                bool done = layer < RunState.Layer;
+                BuildNode(layer);
+            }
 
-                Color color;
-                string suffix;
+            UIWidgets.Label(m_Root, "Space / 点击金色音符进入   ·   B 牌组   ·   O 设置",
+                22, TextAnchor.MiddleCenter, new Color(0.95f, 0.90f, 0.80f, 0.55f),
+                new Vector2(1200f, 40f), new Vector2(0f, -330f));
+        }
 
-                if (current)
-                {
-                    color = new Color(0.2f, 0.32f, 0.45f, 1f);
-                    suffix = "  ← 当前";
-                }
-                else if (done)
-                {
-                    color = new Color(0.14f, 0.15f, 0.18f, 1f);
-                    suffix = "  (已完成)";
-                }
-                else
-                {
-                    color = new Color(0.1f, 0.11f, 0.14f, 1f);
-                    suffix = string.Empty;
-                }
+        private void BuildNode(int layer)
+        {
+            MapNodeType type = RunState.Nodes[layer - 1];
+            bool current = layer == RunState.Layer;
+            bool done = layer < RunState.Layer;
 
-                var row = UIWidgets.Panel(m_Rows, "Layer" + layer, new Vector2(760f, 66f),
-                    new Vector2(0f, 310f - (layer - 1) * 86f), color);
+            float x = -700f + (layer - 1) * 200f;
+            float pitch = (layer % 5 - 2) * 30f;
+            var position = new Vector2(x, pitch);
 
-                UIWidgets.Label(row, (layer + ". " + type + suffix), 28, TextAnchor.MiddleLeft,
-                    current ? Color.white : new Color(0.75f, 0.75f, 0.75f), new Vector2(700f, 50f), new Vector2(30f, 0f));
+            Color color;
+            float size;
+
+            if (current)
+            {
+                color = SheetTheme.Gold;
+                size = 34f;
+                // 当前音符光环
+                SheetTheme.Note(m_Root, position, 60f, new Color(0.78f, 0.62f, 0.24f, 0.18f));
+            }
+            else if (done)
+            {
+                color = new Color(0.55f, 0.50f, 0.42f, 0.55f);
+                size = 20f;
+            }
+            else
+            {
+                color = new Color(0.95f, 0.90f, 0.80f, 0.75f);
+                size = 24f;
+            }
+
+            SheetTheme.Note(m_Root, position, size, color);
+
+            // 点击区
+            var hit = SheetTheme.CreateRect(m_Root, "Hit" + layer);
+            hit.anchorMin = new Vector2(0.5f, 0.5f);
+            hit.anchorMax = new Vector2(0.5f, 0.5f);
+            hit.sizeDelta = new Vector2(84f, 84f);
+            hit.anchoredPosition = position + new Vector2(0f, 18f);
+            var hitImage = hit.gameObject.AddComponent<Image>();
+            hitImage.color = new Color(1f, 1f, 1f, 0f);
+            var button = hit.gameObject.AddComponent<Button>();
+            button.targetGraphic = hitImage;
+            if (current)
+            {
+                button.onClick.AddListener(Advance);
+            }
+            else
+            {
+                button.interactable = false;
+            }
+
+            // 层号与类型
+            UIWidgets.Label(m_Root, NodeName(type), 28, TextAnchor.MiddleCenter,
+                current ? SheetTheme.Gold : new Color(0.95f, 0.90f, 0.80f, 0.6f),
+                new Vector2(200f, 40f), new Vector2(x, pitch - 85f));
+
+            Color indexColor = current ? SheetTheme.Gold : new Color(0.95f, 0.90f, 0.80f, 0.35f);
+            UIWidgets.Label(m_Root, layer.ToString(), 22, TextAnchor.MiddleCenter, indexColor,
+                new Vector2(50f, 30f), new Vector2(x, 95f));
+
+            if (done)
+            {
+                UIWidgets.Label(m_Root, "✓", 30, TextAnchor.MiddleCenter, new Color(0.55f, 0.50f, 0.42f, 0.7f),
+                    new Vector2(50f, 40f), position + new Vector2(0f, 45f));
+            }
+        }
+
+        private static void Advance()
+        {
+            var procedure = CardRhythm.Procedure.GameProcedureBase.Current;
+            if (procedure != null)
+            {
+                procedure.RequestAdvance();
+            }
+        }
+
+        private static string NodeName(MapNodeType type)
+        {
+            switch (type)
+            {
+                case MapNodeType.Battle: return "战斗";
+                case MapNodeType.Event: return "事件";
+                case MapNodeType.Elite: return "精英";
+                default: return "首领";
+            }
+        }
+
+        private void HideTemplateChild(string childName)
+        {
+            Transform child = transform.Find(childName);
+            if (child != null)
+            {
+                child.gameObject.SetActive(false);
             }
         }
     }

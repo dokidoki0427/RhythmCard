@@ -29,6 +29,7 @@ namespace CardRhythm.UI
 
         private void BuildUi()
         {
+            UIWidgets.Backdrop(transform);
             var panel = UIWidgets.Panel(transform, "PausePanel", new Vector2(720f, 560f), Vector2.zero,
                 new Color(0.08f, 0.09f, 0.12f, 0.98f));
 
