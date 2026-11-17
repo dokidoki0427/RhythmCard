@@ -72,7 +72,26 @@ namespace CardRhythm.UI
                 size = 24f;
             }
 
-            SheetTheme.Note(slot, Vector2.zero, size, color);
+            if (SheetTheme.NoteGlyph != null)
+            {
+                var glyph = SheetTheme.CreateRect(slot, "NoteGlyph");
+                glyph.anchorMin = new Vector2(0.5f, 0.5f);
+                glyph.anchorMax = new Vector2(0.5f, 0.5f);
+                float glyphHeight = size * 2.2f;
+                float glyphWidth = glyphHeight * SheetTheme.NoteGlyph.rect.width / SheetTheme.NoteGlyph.rect.height;
+                glyph.sizeDelta = new Vector2(glyphWidth, glyphHeight);
+                glyph.anchoredPosition = Vector2.zero;
+
+                var glyphImage = glyph.gameObject.AddComponent<Image>();
+                glyphImage.sprite = SheetTheme.NoteGlyph;
+                glyphImage.preserveAspect = true;
+                glyphImage.color = color;
+                glyphImage.raycastTarget = false;
+            }
+            else
+            {
+                SheetTheme.Note(slot, Vector2.zero, size, color);
+            }
 
             var image = slot.GetComponent<Image>();
             if (image == null)

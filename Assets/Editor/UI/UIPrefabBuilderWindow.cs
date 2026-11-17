@@ -124,7 +124,7 @@ namespace CardRhythm.EditorUI
             float[] noteY = { 201f, 235f, 269f, 167f, 303f };
             for (int i = 0; i < noteX.Length; i++)
             {
-                Note(root.transform, new Vector2(noteX[i], noteY[i]), 34f, SheetTheme.Ink);
+                Glyph(root.transform, new Vector2(noteX[i], noteY[i]), 78f, SheetTheme.Ink);
             }
 
             Rect(root.transform, "Rule", new Vector2(760f, 2f), new Vector2(0f, 130f), new Color(0.15f, 0.13f, 0.11f, 0.25f));
@@ -202,7 +202,7 @@ namespace CardRhythm.EditorUI
 
             var panel = Rect(root.transform, "Panel", panelSize, Vector2.zero, panelColor);
             var panelImage = panel.GetComponent<Image>();
-            panelImage.sprite = Resources.Load<Sprite>("UI/PanelFrame");
+            panelImage.sprite = Resources.Load<Sprite>("Pic/PanelFrame");
             if (panelImage.sprite != null)
             {
                 panelImage.type = Image.Type.Sliced;
@@ -282,7 +282,7 @@ namespace CardRhythm.EditorUI
             var rect = Rect(parent, name, size, position, background);
             var image = rect.GetComponent<Image>();
             image.raycastTarget = true; // 按钮必须可接收射线，否则点不动
-            image.sprite = Resources.Load<Sprite>("UI/ButtonFrame");
+            image.sprite = Resources.Load<Sprite>("Pic/ButtonFrame");
             if (image.sprite != null)
             {
                 image.type = Image.Type.Sliced;
@@ -305,17 +305,33 @@ namespace CardRhythm.EditorUI
             }
         }
 
+        private static void Glyph(Transform parent, Vector2 position, float height, Color color)
+        {
+            var sprite = Resources.Load<Sprite>("Pic/NoteGlyph");
+            if (sprite == null)
+            {
+                Note(parent, position, height * 0.5f, color);
+                return;
+            }
+
+            float width = height * sprite.rect.width / sprite.rect.height;
+            var rect = Rect(parent, "NoteGlyph", new Vector2(width, height), position, color);
+            var image = rect.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+        }
+
         private static void Note(Transform parent, Vector2 position, float size, Color color)
         {
             var head = Rect(parent, "NoteHead", new Vector2(size, size * 0.78f), position, color);
             var headImage = head.GetComponent<Image>();
-            headImage.sprite = Resources.Load<Sprite>("UI/NoteHead") ?? UISpriteSetup.EnsureCircle();
+            headImage.sprite = Resources.Load<Sprite>("Pic/NoteHead") ?? UISpriteSetup.EnsureCircle();
             headImage.type = Image.Type.Simple;
             headImage.preserveAspect = true;
 
             var stem = Rect(parent, "Stem", new Vector2(4f, size * 2.2f), position + new Vector2(size * 0.45f, size * 1.1f), color);
             var stemImage = stem.GetComponent<Image>();
-            stemImage.sprite = Resources.Load<Sprite>("UI/Stem");
+            stemImage.sprite = Resources.Load<Sprite>("Pic/Stem");
             if (stemImage.sprite != null)
             {
                 stemImage.type = Image.Type.Sliced;

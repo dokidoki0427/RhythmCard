@@ -39,7 +39,7 @@ namespace CardRhythm.UI
         {
             get
             {
-                Sprite asset = Load("UI/Circle");
+                Sprite asset = Load("Pic/Circle");
                 if (asset != null)
                 {
                     return asset;
@@ -54,39 +54,44 @@ namespace CardRhythm.UI
             }
         }
 
+        public static Sprite NoteGlyph
+        {
+            get { return Load("Pic/NoteGlyph"); }
+        }
+
         public static Sprite NoteHead
         {
-            get { return Load("UI/NoteHead") ?? Circle; }
+            get { return Load("Pic/NoteHead") ?? Circle; }
         }
 
         public static Sprite NoteHeadOutline
         {
-            get { return Load("UI/NoteHeadOutline") ?? Circle; }
+            get { return Load("Pic/NoteHeadOutline") ?? Circle; }
         }
 
         public static Sprite Stem
         {
-            get { return Load("UI/Stem"); }
+            get { return Load("Pic/Stem"); }
         }
 
         public static Sprite ButtonFrame
         {
-            get { return Load("UI/ButtonFrame"); }
+            get { return Load("Pic/ButtonFrame"); }
         }
 
         public static Sprite PanelFrame
         {
-            get { return Load("UI/PanelFrame"); }
+            get { return Load("Pic/PanelFrame"); }
         }
 
         public static Sprite CardFrame
         {
-            get { return Load("UI/CardFrame"); }
+            get { return Load("Pic/CardFrame"); }
         }
 
         public static Sprite BarFrame
         {
-            get { return Load("UI/BarFrame"); }
+            get { return Load("Pic/BarFrame"); }
         }
 
         private static Sprite Load(string path)

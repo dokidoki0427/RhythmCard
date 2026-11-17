@@ -11,7 +11,7 @@ namespace CardRhythm.EditorUI
     /// </summary>
     public static class UISpriteLibrary
     {
-        private const string Folder = "Assets/GameMain/Resources/UI";
+        private const string Folder = "Assets/GameMain/Resources/Pic";
 
         [MenuItem("Tools/卡牌音游/UI/生成图片资源", false, 92)]
         public static void GenerateMenu()
@@ -41,9 +41,42 @@ namespace CardRhythm.EditorUI
             CreateRounded("PanelFrame", 256, 256, 28, new Vector4(28, 28, 28, 28));
             CreateRounded("BarFrame", 256, 32, 14, new Vector4(14, 14, 14, 14));
 
+            // 外部放进来的图（例如美术下载的音符）也要保证是 Sprite 导入。
+            EnsureSprite(Folder + "/NoteGlyph.png");
+            EnsureSprite(Folder + "/音符.png");
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             return Count() - before;
+        }
+
+        /// <summary>把已存在的图片强制设为 Sprite 导入（保留 GUID）。</summary>
+        public static void EnsureSprite(string path)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Object>(path) == null)
+            {
+                return;
+            }
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            if (importer.textureType == TextureImporterType.Sprite
+                && importer.spriteImportMode == SpriteImportMode.Single
+                && importer.alphaIsTransparency)
+            {
+                return;
+            }
+
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.spritePixelsPerUnit = 100f;
+            importer.SaveAndReimport();
         }
 
         // ── 形状 ────────────────────────────────────────────────
