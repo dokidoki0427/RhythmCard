@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using CardRhythm.Battle;
+using CardRhythm.Cards;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +12,7 @@ namespace CardRhythm.UI
     /// </summary>
     public sealed class MapForm : UIFormBase
     {
+        private static Dictionary<string, EnemyDefinition> s_Enemies;
         private readonly RectTransform[] m_Slots = new RectTransform[RunState.MaxLayer];
 
         protected override void OnOpen(object userData)
@@ -94,9 +97,9 @@ namespace CardRhythm.UI
                 button.onClick.AddListener(Advance);
             }
 
-            UIWidgets.Label(slot, NodeName(type), 26, TextAnchor.MiddleCenter,
+            UIWidgets.Label(slot, NodeLabel(layer, type), 24, TextAnchor.MiddleCenter,
                 current ? SheetTheme.Gold : new Color(0.95f, 0.90f, 0.80f, 0.6f),
-                new Vector2(220f, 34f), new Vector2(0f, -60f));
+                new Vector2(240f, 56f), new Vector2(0f, -66f));
 
             UIWidgets.Label(slot, layer.ToString(), 22, TextAnchor.MiddleCenter,
                 current ? SheetTheme.Gold : new Color(0.95f, 0.90f, 0.80f, 0.35f),
@@ -107,6 +110,40 @@ namespace CardRhythm.UI
                 UIWidgets.Label(slot, "✓", 30, TextAnchor.MiddleCenter, new Color(0.55f, 0.50f, 0.42f, 0.7f),
                     new Vector2(50f, 40f), new Vector2(0f, 46f));
             }
+        }
+
+        private static string NodeLabel(int layer, MapNodeType type)
+        {
+            string label = NodeName(type);
+            string enemyId = RunState.EnemyIds[layer - 1];
+            if (!string.IsNullOrEmpty(enemyId))
+            {
+                EnemyDefinition enemy = LoadEnemy(enemyId);
+                if (enemy != null)
+                {
+                    label += "\n" + enemy.DisplayName;
+                }
+            }
+
+            return label;
+        }
+
+        private static EnemyDefinition LoadEnemy(string id)
+        {
+            if (s_Enemies == null)
+            {
+                s_Enemies = new Dictionary<string, EnemyDefinition>();
+            }
+
+            EnemyDefinition cached;
+            if (s_Enemies.TryGetValue(id, out cached))
+            {
+                return cached;
+            }
+
+            var enemy = Resources.Load<EnemyDefinition>("Enemies/" + id);
+            s_Enemies[id] = enemy;
+            return enemy;
         }
 
         private void SetText(string childName, string value)

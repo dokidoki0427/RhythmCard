@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using CardRhythm.Battle;
 using CardRhythm.Settings;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,6 +44,15 @@ namespace CardRhythm.Rhythm
         private Chart m_Chart;
         private Conductor m_Conductor;
         private Judger m_Judger;
+        private BattleState m_State;
+        private string m_EnemyName;
+        private Image m_PlayerHpFill;
+        private Image m_EnemyHpFill;
+        private Text m_PlayerHpText;
+        private Text m_EnemyHpText;
+        private Text m_ComboText;
+        private Text m_ScoreText;
+        private Text m_AccentText;
         private Transform m_CanvasRoot;
         private float m_TravelSeconds = 1f;
 
@@ -51,11 +61,14 @@ namespace CardRhythm.Rhythm
             return LaneAreaX + (lane + 0.5f) * LaneWidth;
         }
 
-        public void Build(Chart chart, Conductor conductor, IReadOnlyDictionary<string, Color> colors, Judger judger)
+        public void Build(Chart chart, Conductor conductor, IReadOnlyDictionary<string, Color> colors, Judger judger,
+            BattleState state, string enemyName)
         {
             m_Chart = chart;
             m_Conductor = conductor;
             m_Judger = judger;
+            m_State = state;
+            m_EnemyName = enemyName;
             m_TravelSeconds = conductor.SecondsPerBeat * TravelBeats;
 
             var canvasObject = new GameObject("NoteStage", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -70,7 +83,9 @@ namespace CardRhythm.Rhythm
             m_CanvasRoot = canvasObject.transform;
 
             m_CharacterPanel = BuildSidePanel(canvasObject.transform, "CharacterPanel", "CHARACTER", 0f, new Color(0.14f, 0.2f, 0.3f, 0.9f));
-            BuildSidePanel(canvasObject.transform, "MonsterPanel", "MONSTER", ReferenceWidth - SidePanelWidth, new Color(0.3f, 0.14f, 0.16f, 0.9f));
+            RectTransform monsterPanel = BuildSidePanel(canvasObject.transform, "MonsterPanel", "MONSTER", ReferenceWidth - SidePanelWidth, new Color(0.3f, 0.14f, 0.16f, 0.9f));
+
+            BuildHud(canvasObject.transform, m_CharacterPanel, monsterPanel);
 
             for (int lane = 0; lane < 4; lane++)
             {
@@ -334,6 +349,106 @@ namespace CardRhythm.Rhythm
             }
         }
 
+        private void BuildHud(Transform canvasRoot, RectTransform characterPanel, RectTransform monsterPanel)
+        {
+            m_PlayerHpText = CreateText(characterPanel, "HP 100", 28, TextAnchor.MiddleCenter, Color.white);
+            AnchorBottom(m_PlayerHpText.rectTransform, 150f, 320f, 34f);
+            m_PlayerHpFill = BuildHpBar(characterPanel, 110f, new Color(0.45f, 0.85f, 0.55f, 1f));
+
+            m_EnemyHpText = CreateText(monsterPanel, "ENEMY", 26, TextAnchor.MiddleCenter, Color.white);
+            AnchorBottom(m_EnemyHpText.rectTransform, 150f, 340f, 60f);
+            m_EnemyHpFill = BuildHpBar(monsterPanel, 110f, new Color(0.9f, 0.4f, 0.4f, 1f));
+
+            m_ComboText = CreateText(canvasRoot, "COMBO 0", 44, TextAnchor.MiddleCenter, new Color(0.78f, 0.62f, 0.24f, 1f));
+            m_ComboText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            m_ComboText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            m_ComboText.rectTransform.sizeDelta = new Vector2(500f, 56f);
+            m_ComboText.rectTransform.anchoredPosition = new Vector2(0f, -56f);
+
+            m_ScoreText = CreateText(canvasRoot, "SCORE 0", 26, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.85f));
+            m_ScoreText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            m_ScoreText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            m_ScoreText.rectTransform.sizeDelta = new Vector2(400f, 32f);
+            m_ScoreText.rectTransform.anchoredPosition = new Vector2(0f, -96f);
+
+            m_AccentText = CreateText(canvasRoot, string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.78f, 0.62f, 0.24f, 1f));
+            m_AccentText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            m_AccentText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            m_AccentText.rectTransform.sizeDelta = new Vector2(400f, 30f);
+            m_AccentText.rectTransform.anchoredPosition = new Vector2(0f, -128f);
+
+            Text layerText = CreateText(canvasRoot, "LAYER " + RunState.Layer + " / " + RunState.MaxLayer, 24,
+                TextAnchor.MiddleLeft, new Color(1f, 1f, 1f, 0.7f));
+            layerText.rectTransform.anchorMin = new Vector2(0f, 1f);
+            layerText.rectTransform.anchorMax = new Vector2(0f, 1f);
+            layerText.rectTransform.pivot = new Vector2(0f, 1f);
+            layerText.rectTransform.sizeDelta = new Vector2(300f, 30f);
+            layerText.rectTransform.anchoredPosition = new Vector2(16f, -16f);
+        }
+
+        private static Image BuildHpBar(RectTransform panel, float y, Color fillColor)
+        {
+            var background = CreateRect(panel, "HpBar");
+            background.anchorMin = new Vector2(0.5f, 0f);
+            background.anchorMax = new Vector2(0.5f, 0f);
+            background.pivot = new Vector2(0.5f, 0f);
+            background.sizeDelta = new Vector2(320f, 26f);
+            background.anchoredPosition = new Vector2(0f, y);
+
+            var backgroundImage = background.gameObject.AddComponent<Image>();
+            backgroundImage.color = new Color(0f, 0f, 0f, 0.45f);
+            backgroundImage.raycastTarget = false;
+
+            var fill = CreateRect(background, "Fill");
+            fill.anchorMin = new Vector2(0f, 0.5f);
+            fill.anchorMax = new Vector2(0f, 0.5f);
+            fill.pivot = new Vector2(0f, 0.5f);
+            fill.anchoredPosition = new Vector2(-156f, 0f);
+            fill.sizeDelta = new Vector2(312f, 18f);
+
+            var fillImage = fill.gameObject.AddComponent<Image>();
+            fillImage.color = fillColor;
+            fillImage.raycastTarget = false;
+            return fillImage;
+        }
+
+        private static void AnchorBottom(RectTransform rect, float y, float width, float height)
+        {
+            rect.anchorMin = new Vector2(0.5f, 0f);
+            rect.anchorMax = new Vector2(0.5f, 0f);
+            rect.pivot = new Vector2(0.5f, 0f);
+            rect.sizeDelta = new Vector2(width, height);
+            rect.anchoredPosition = new Vector2(0f, y);
+        }
+
+        public void SetAccentArmed(bool armed)
+        {
+            if (m_AccentText != null)
+            {
+                m_AccentText.text = armed ? "ACCENT ARMED" : string.Empty;
+            }
+        }
+
+        private void UpdateHud()
+        {
+            if (m_State == null || m_PlayerHpFill == null)
+            {
+                return;
+            }
+
+            float player = Mathf.Clamp01(m_State.PlayerHp / BattleState.DefaultPlayerHp);
+            m_PlayerHpFill.rectTransform.sizeDelta = new Vector2(312f * player, 18f);
+            m_PlayerHpText.text = "HP " + m_State.DisplayPlayerHp;
+
+            float enemy = Mathf.Clamp01(m_State.EnemyHp / Mathf.Max(1f, m_State.MaxEnemyHp));
+            m_EnemyHpFill.rectTransform.sizeDelta = new Vector2(312f * enemy, 18f);
+            m_EnemyHpText.text = (m_EnemyName ?? "ENEMY") + "\nHP " + m_State.DisplayEnemyHp
+                + (m_State.ShieldActive ? "   SHIELD " + m_State.DisplayShieldHp : string.Empty);
+
+            m_ComboText.text = "COMBO " + m_State.Combo;
+            m_ScoreText.text = "SCORE " + m_State.Score;
+        }
+
         private void OnJudged(NoteData note, Judgement judgement)
         {
             JudgementPopup popup = FindFreePopup();
@@ -355,6 +470,7 @@ namespace CardRhythm.Rhythm
             UpdateKeyFeedback();
             UpdatePopups();
             UpdateLaneFlashes();
+            UpdateHud();
 
             if (m_Chart == null || m_Conductor == null || !m_Conductor.IsRunning)
             {

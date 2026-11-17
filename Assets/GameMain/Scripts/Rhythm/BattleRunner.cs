@@ -25,6 +25,7 @@ namespace CardRhythm.Rhythm
         private Dictionary<string, CardDefinition> m_Cards;
         private string m_AccentCardId;
         private string m_LastShownCardId;
+        private string m_EnemyName;
         private float m_Bpm;
         private float m_EndTime;
 
@@ -49,7 +50,9 @@ namespace CardRhythm.Rhythm
             List<CardSpec> deck = BuildDeck(deckCards);
             Chart = ChartGenerator.Generate(deck, bpm, bars);
 
-            m_State = new BattleState(LoadEnemy());
+            var enemy = LoadEnemy();
+            m_EnemyName = enemy != null ? enemy.DisplayName : "未知敌人";
+            m_State = new BattleState(enemy);
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
             m_Audio = gameObject.AddComponent<LaneAudioPlayer>();
@@ -57,7 +60,7 @@ namespace CardRhythm.Rhythm
 
             Judger = new Judger(Chart);
             Judger.JudgedEvent += OnJudged;
-            m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger);
+            m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger, m_State, m_EnemyName);
 
             m_EndTime = Chart.Duration + 2f;
             m_Conductor.StartSong(bpm, 1.5f);
@@ -161,6 +164,10 @@ namespace CardRhythm.Rhythm
             }
 
             m_AccentCardId = next.SourceCardId;
+            if (m_View != null)
+            {
+                m_View.SetAccentArmed(true);
+            }
         }
 
         private void OnJudged(NoteData note, Judgement judgement)
@@ -211,34 +218,6 @@ namespace CardRhythm.Rhythm
             if (handler != null)
             {
                 handler();
-            }
-        }
-
-        private void OnGUI()
-        {
-            if (m_State == null)
-            {
-                return;
-            }
-
-            var style = new GUIStyle(GUI.skin.label);
-            style.fontSize = 22;
-            style.normal.textColor = Color.white;
-
-            GUI.Label(new Rect(24f, 96f, 700f, 28f), "Layer " + RunState.Layer + " / " + RunState.MaxLayer + "   " + m_State.Behavior, style);
-            GUI.Label(new Rect(24f, 126f, 700f, 28f), "Player HP: " + m_State.DisplayPlayerHp + " / 100", style);
-            GUI.Label(new Rect(24f, 156f, 700f, 28f), "Enemy HP: " + m_State.DisplayEnemyHp + " / " + Mathf.CeilToInt(m_State.MaxEnemyHp), style);
-            if (m_State.Behavior == EnemyBehavior.Shielded)
-            {
-                GUI.Label(new Rect(24f, 186f, 700f, 28f), "Shield: " + m_State.DisplayShieldHp + "  (only accent breaks it)", style);
-            }
-
-            GUI.Label(new Rect(24f, 216f, 700f, 28f), "Combo: " + Judger.Combo + "   Score: " + m_State.Score, style);
-            GUI.Label(new Rect(24f, 246f, 700f, 28f), "Judged: " + Judger.Judged + " / " + Judger.Total + "   Miss: " + m_State.Miss, style);
-
-            if (!string.IsNullOrEmpty(m_AccentCardId))
-            {
-                GUI.Label(new Rect(24f, 276f, 700f, 28f), "ACCENT armed: " + m_AccentCardId, style);
             }
         }
 

@@ -39,6 +39,11 @@ namespace CardRhythm.UI
             UIWidgets.Label(panel, "PAUSED", 46, TextAnchor.MiddleCenter, Color.white,
                 new Vector2(600f, 70f), new Vector2(0f, 190f));
 
+            UIWidgets.Label(panel, "第 " + CardRhythm.Battle.RunState.Layer + " 层 / " + CardRhythm.Battle.RunState.MaxLayer
+                    + "   ·   牌组 " + CardRhythm.Settings.GameSettings.LoadDeck().Count + " 张",
+                24, TextAnchor.MiddleCenter, new Color(0.8f, 0.8f, 0.8f),
+                new Vector2(600f, 40f), new Vector2(0f, 138f));
+
             UIWidgets.Button(panel, "继续", new Vector2(360f, 66f), new Vector2(0f, 70f), Close,
                 new Color(0.22f, 0.32f, 0.28f));
             UIWidgets.Button(panel, "设置", new Vector2(360f, 66f), new Vector2(0f, -20f), OpenSettings,
