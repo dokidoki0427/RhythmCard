@@ -21,8 +21,8 @@ namespace CardRhythm.Procedure
 
             GameProcedureBase current = GameProcedureBase.Current;
             string name = current != null ? current.GetType().Name : "(none)";
-            GUI.Label(new Rect(24f, 20f, 900f, 30f), "Procedure: " + name, m_Style);
-            GUI.Label(new Rect(24f, 52f, 900f, 30f), "[Space] next", m_Style);
+            float y = Screen.height - 66f;
+            GUI.Label(new Rect(24f, y, 900f, 30f), "Procedure: " + name + "    [Space] next", m_Style);
         }
     }
 }

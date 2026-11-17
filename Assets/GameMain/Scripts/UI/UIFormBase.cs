@@ -5,7 +5,7 @@ namespace CardRhythm.UI
 {
     /// <summary>
     /// 所有界面的基类。GF 的 UIFormLogic 已经提供了 OnInit / OnOpen / OnClose / OnPause / OnResume，
-    /// 这里只补两件业务层常用的事：拿到自己所在的分组名（层级），以及一个关闭自己的快捷方法。
+    /// 这里补：全屏拉伸（保证任何预制体根节点都铺满屏幕）、分组名、关闭自己。
     /// </summary>
     public abstract class UIFormBase : UIFormLogic
     {
@@ -21,6 +21,39 @@ namespace CardRhythm.UI
 
                 return UIForm.UIGroup.Name;
             }
+        }
+
+        protected override void OnInit(object userData)
+        {
+            base.OnInit(userData);
+            StretchToScreen();
+        }
+
+        protected override void OnOpen(object userData)
+        {
+            base.OnOpen(userData);
+            StretchToScreen();
+        }
+
+        /// <summary>
+        /// 强制把界面根节点铺满父 Canvas：
+        /// 不管预制体里的锚点/尺寸当初怎么摆，运行时都归一到全屏，避免界面偏到角落。
+        /// </summary>
+        public void StretchToScreen()
+        {
+            var rect = transform as RectTransform;
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.anchoredPosition = Vector2.zero;
+            rect.localScale = Vector3.one;
         }
 
         /// <summary>关闭自己。</summary>

@@ -1,6 +1,7 @@
 using CardRhythm.UI;
 using GameFramework.Fsm;
 using GameFramework.Procedure;
+using UnityGameFramework.Runtime;
 using UnityEngine;
 
 namespace CardRhythm.Procedure
@@ -18,6 +19,13 @@ namespace CardRhythm.Procedure
             base.OnEnter(procedureOwner);
             m_Elapsed = 0f;
             UIRouter.CloseAll();
+
+            // GF 自带的 Debugger 面板会挡住左上角标题，先关掉；需要时可在设置里做开关。
+            var debugger = GameEntry.GetComponent<DebuggerComponent>();
+            if (debugger != null)
+            {
+                debugger.ActiveWindow = false;
+            }
         }
 
         protected override void OnUpdate(IFsm<IProcedureManager> procedureOwner, float elapseSeconds, float realElapseSeconds)
