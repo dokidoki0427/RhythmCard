@@ -296,3 +296,20 @@ Assets/GameMain/Resources/Buffs/
 | P3 | 谱面编辑器（网格 + 槽位 + 校验） |
 | P4 | 层间 Buff 三选一 + 持有限制 + 配装 |
 | P5 | 删除卡牌 UI/资产/测试，CI 改 charts/buffs 校验 |
+
+---
+
+## 13. 实现进度（2026-11-18）
+
+已完成：
+
+- **数据**：`Charts/ChartDefinition.cs`（Bar/Slot/Lane/SlotId）；Buff 复用 `CardDefinition`，新增 `HealEffect`。
+- **内容**：`Tools/卡牌音游/谱面/生成测试 Buff` 生成 6 个 Buff；`生成测试谱面` 生成 4 张谱面（每张 7 个槽位）。
+- **运行时**：`BattleRunner` 读 `Resources/Charts/chart_{enemyId}`，把玩家持有的 Buff 自动填槽（循环使用、每个槽位独立计数）；`BattleState` 按判定权重结算 Buff（Perfect 1.0 / Good 0.7 / Bad 0.4 / Miss 0）；**普通音符不再造成伤害**，强拍机制删除。
+- **成长**：每 N 场战斗三选一（`GameSettings.RewardEveryBattles`，设置界面可调，默认 1）；上限 3，满 3 时替换最早的一个。
+- **编辑器**：`Tools/卡牌音游/Buff 编辑器`（复用卡牌编辑器，指向 `Resources/Buffs`）；`Tools/卡牌音游/谱面编辑器`（网格放置音符、槽位模式、校验、自动保存）。
+- **动画**：`UI/UIAnimator.cs` 用协程实现打开淡入+缩放、关闭淡出；**DOTween 未安装**（Asset Store 无法批处理安装），后续接入只需替换该文件实现。
+
+测试：`verify` PASS，EditMode 51/51。
+
+试玩：直接 Play → 开始游戏。首次运行没有 Buff 存档，会自动发放 3 个基础 Buff；设置里可调“每 N 场给一次选择”。

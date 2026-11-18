@@ -13,8 +13,24 @@ namespace CardRhythm.EditorCards
     /// </summary>
     public static class CardAssetFactory
     {
-        public const string Folder = "Assets/GameMain/Resources/Cards";
-        public const string EffectFolder = "Assets/GameMain/Data/Effects";
+        public const string CardsFolder = "Assets/GameMain/Resources/Cards";
+        public const string CardsEffectFolder = "Assets/GameMain/Data/Effects";
+
+        /// <summary>当前编辑目标：卡牌或 Buff。</summary>
+        public static string Folder = CardsFolder;
+        public static string EffectFolder = CardsEffectFolder;
+
+        public static void UseCards()
+        {
+            Folder = CardsFolder;
+            EffectFolder = CardsEffectFolder;
+        }
+
+        public static void UseBuffs()
+        {
+            Folder = "Assets/GameMain/Resources/Buffs";
+            EffectFolder = "Assets/GameMain/Data/Buffs";
+        }
 
         public static List<CardDefinition> LoadAll()
         {

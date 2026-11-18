@@ -26,7 +26,18 @@ namespace CardRhythm.EditorCards
         [MenuItem("Tools/卡牌音游/卡牌编辑器", false, 100)]
         public static void Open()
         {
+            CardAssetFactory.UseCards();
             var window = GetWindow<CardDesignerWindow>("卡牌编辑器");
+            window.minSize = new Vector2(880f, 560f);
+            window.Reload();
+        }
+
+        [MenuItem("Tools/卡牌音游/Buff 编辑器", false, 101)]
+        public static void OpenBuffs()
+        {
+            CardAssetFactory.UseBuffs();
+            var window = GetWindow<CardDesignerWindow>("Buff 编辑器");
+            window.titleContent = new GUIContent("Buff 编辑器");
             window.minSize = new Vector2(880f, 560f);
             window.Reload();
         }
