@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CardRhythm.Battle;
 using CardRhythm.Cards;
+using CardRhythm.Charts;
 using CardRhythm.Settings;
 using CardRhythm.UI;
 using UnityEngine;
@@ -10,21 +10,19 @@ using UnityEngine;
 namespace CardRhythm.Rhythm
 {
     /// <summary>
-    /// 一场战斗的运行器：加载卡牌 → 建牌组 → 生成谱面 → 启动时钟 → 判定 → 数值结算 → 结束。
-    /// 卡牌来自 Resources/Cards（原型阶段直接从 Resources 取，正式版换 GF 资源管线）。
+    /// 一场战斗的运行器：读取敌人固定谱面 → 把玩家持有的 Buff 填进槽位 → 起时钟 → 判定 → Buff 结算。
+    /// 战斗不再有卡组与基础伤害。
     /// </summary>
     public class BattleRunner : MonoBehaviour
     {
-        private const int DeckSize = 8;
-        private const int AccentCycleBars = 4;
+        private const int MaxBuffs = 3;
 
         private Conductor m_Conductor;
         private NoteStageView m_View;
         private LaneAudioPlayer m_Audio;
         private BattleState m_State;
-        private Dictionary<string, CardDefinition> m_Cards;
-        private string m_AccentCardId;
-        private string m_LastShownCardId;
+        private Dictionary<string, CardDefinition> m_BuffDefs = new Dictionary<string, CardDefinition>();
+        private List<CardDefinition> m_Assigned = new List<CardDefinition>();
         private string m_EnemyName;
         private float m_Bpm;
         private float m_EndTime;
@@ -37,6 +35,7 @@ namespace CardRhythm.Rhythm
         public bool AbortRequested { get; private set; }
         public Judger Judger { get; private set; }
         public Chart Chart { get; private set; }
+
         public BattleState State
         {
             get { return m_State; }
@@ -44,15 +43,14 @@ namespace CardRhythm.Rhythm
 
         public void Begin(float bpm = 120f, int bars = 32)
         {
-            m_Bpm = bpm;
-            m_Cards = LoadCards();
-            List<CardDefinition> deckCards = ResolveDeckCards(m_Cards);
-            List<CardSpec> deck = BuildDeck(deckCards);
-            Chart = ChartGenerator.Generate(deck, bpm, bars);
-
             var enemy = LoadEnemy();
             m_EnemyName = enemy != null ? enemy.DisplayName : "未知敌人";
             m_State = new BattleState(enemy);
+
+            ChartDefinition definition = LoadChart(enemy);
+            m_Bpm = definition != null ? definition.Bpm : bpm;
+            Chart = BuildChart(definition);
+
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
             m_Audio = gameObject.AddComponent<LaneAudioPlayer>();
@@ -60,10 +58,10 @@ namespace CardRhythm.Rhythm
 
             Judger = new Judger(Chart);
             Judger.JudgedEvent += OnJudged;
-            m_View.Build(Chart, m_Conductor, BuildColors(deck), Judger, m_State, m_EnemyName);
+            m_View.Build(Chart, m_Conductor, BuildColors(), Judger, m_State, m_EnemyName);
 
             m_EndTime = Chart.Duration + 2f;
-            m_Conductor.StartSong(bpm, 1.5f);
+            m_Conductor.StartSong(m_Bpm, 1.5f);
             Current = this;
         }
 
@@ -116,8 +114,6 @@ namespace CardRhythm.Rhythm
                 }
             }
 
-            UpdateAccent(songTime);
-
             if (Judger.IsFinished || songTime > m_EndTime || m_State.IsVictory || m_State.IsDefeat)
             {
                 FinishBattle();
@@ -146,66 +142,24 @@ namespace CardRhythm.Rhythm
             UIRouter.Close(UIFormId.Pause);
         }
 
-        private void UpdateAccent(float songTime)
-        {
-            if (!Input.GetKeyDown(KeyCode.Space))
-            {
-                return;
-            }
-
-            // 每 4 小节的最后 1 小节是强拍窗口。
-            int bar = Mathf.FloorToInt(songTime / (m_Conductor.SecondsPerBeat * 4f));
-            bool windowOpen = bar % AccentCycleBars == AccentCycleBars - 1;
-
-            NoteData next;
-            if (!windowOpen || !Judger.TryPeekNextNote(out next))
-            {
-                return;
-            }
-
-            m_AccentCardId = next.SourceCardId;
-            if (m_View != null)
-            {
-                m_View.SetAccentArmed(true);
-            }
-        }
-
         private void OnJudged(NoteData note, Judgement judgement)
         {
-            if (note.SourceCardId != m_LastShownCardId)
-            {
-                m_LastShownCardId = note.SourceCardId;
-                CardDefinition displayed;
-                if (m_Cards != null && m_Cards.TryGetValue(note.SourceCardId, out displayed))
-                {
-                    var damageEffect = displayed.Effect as DamageEffect;
-                    m_View.ShowPlayedCard(displayed.Id, displayed.DisplayName, displayed.Accent,
-                        damageEffect != null ? damageEffect.Damage : 1, displayed.Icon);
-                }
-            }
-
             if (judgement != Judgement.Miss)
             {
                 m_View.FlashLane(note.Lane, NoteStageView.ColorOf(judgement));
             }
 
-            bool accent = !string.IsNullOrEmpty(m_AccentCardId) && note.SourceCardId == m_AccentCardId;
-            m_State.ApplyJudgement(judgement, DamageOf(note), accent);
-        }
+            m_State.ApplyJudgement(judgement);
 
-        private float DamageOf(NoteData note)
-        {
-            CardDefinition card;
-            if (m_Cards != null && m_Cards.TryGetValue(note.SourceCardId, out card))
+            if (!string.IsNullOrEmpty(note.BuffId) && m_State.ApplyBuffNote(note.BuffId, judgement))
             {
-                var damageEffect = card.Effect as DamageEffect;
-                if (damageEffect != null)
+                BuffActivation activation = m_State.LastActivation;
+                if (activation != null)
                 {
-                    return damageEffect.Damage / (float)Mathf.Max(1, card.NoteCount);
+                    m_View.ShowPlayedCard(note.BuffId, activation.DisplayName, activation.Color,
+                        Mathf.RoundToInt(activation.Activation * 100f), null);
                 }
             }
-
-            return 1f;
         }
 
         private void FinishBattle()
@@ -221,43 +175,110 @@ namespace CardRhythm.Rhythm
             }
         }
 
-        private static Dictionary<string, CardDefinition> LoadCards()
+        // ── 谱面与 Buff ─────────────────────────────────────────
+
+        private Chart BuildChart(ChartDefinition definition)
         {
-            var cards = new Dictionary<string, CardDefinition>();
-            foreach (CardDefinition card in Resources.LoadAll<CardDefinition>("Cards"))
+            if (definition == null)
             {
-                if (card != null && !cards.ContainsKey(card.Id))
+                return new Chart(m_Bpm, 1, 8, new List<NoteData>());
+            }
+
+            List<CardDefinition> owned = LoadOwnedBuffs();
+            List<string> slots = definition.SlotIds();
+
+            var slotBuff = new Dictionary<string, string>();
+            for (int i = 0; i < slots.Count && owned.Count > 0; i++)
+            {
+                CardDefinition buff = owned[i % owned.Count];
+                string key = buff.Id + "#" + i;
+                slotBuff[slots[i]] = key;
+                int required = Mathf.Min(buff.NoteCount, definition.SlotNoteCount(slots[i]));
+                m_State.RegisterBuff(key, buff, required);
+                m_BuffDefs[key] = buff;
+                m_Assigned.Add(buff);
+            }
+
+            var notes = new List<NoteData>(definition.Notes.Count);
+            float secondsPerSlot = 60f / definition.Bpm * 0.5f;
+            foreach (ChartNote note in definition.Notes)
+            {
+                string buffKey = null;
+                if (!string.IsNullOrEmpty(note.SlotId))
                 {
-                    cards.Add(card.Id, card);
+                    string key;
+                    if (slotBuff.TryGetValue(note.SlotId, out key))
+                    {
+                        buffKey = key;
+                    }
                 }
+
+                float time = (note.Bar * 8 + note.Slot) * secondsPerSlot;
+                notes.Add(new NoteData(note.Bar, note.Slot, note.Lane, time, buffKey));
             }
 
-            if (cards.Count == 0)
-            {
-                Debug.LogWarning("[BATTLE] Resources/Cards 为空，使用无效果占位牌。");
-            }
-
-            return cards;
+            return new Chart(definition.Bpm, definition.Bars, 8, notes);
         }
 
-        private static List<CardDefinition> ResolveDeckCards(Dictionary<string, CardDefinition> all)
+        private static List<CardDefinition> LoadOwnedBuffs()
         {
             var result = new List<CardDefinition>();
             foreach (string id in GameSettings.LoadDeck())
             {
-                CardDefinition card;
-                if (all.TryGetValue(id, out card))
+                if (result.Count >= MaxBuffs)
                 {
-                    result.Add(card);
+                    break;
+                }
+
+                var buff = Resources.Load<CardDefinition>("Buffs/" + id);
+                if (buff != null)
+                {
+                    result.Add(buff);
                 }
             }
 
             if (result.Count == 0)
             {
-                result.AddRange(all.Values);
+                // 首次运行没有存档：自动发三个基础 Buff，保证能直接开打。
+                var all = Resources.LoadAll<CardDefinition>("Buffs");
+                System.Array.Sort(all, (a, b) => string.CompareOrdinal(a.Id, b.Id));
+                var ids = new List<string>();
+                for (int i = 0; i < all.Length && i < MaxBuffs; i++)
+                {
+                    result.Add(all[i]);
+                    ids.Add(all[i].Id);
+                }
+
+                if (ids.Count > 0)
+                {
+                    GameSettings.SaveDeck(ids);
+                }
             }
 
             return result;
+        }
+
+        private Dictionary<string, Color> BuildColors()
+        {
+            var colors = new Dictionary<string, Color>();
+            foreach (KeyValuePair<string, CardDefinition> pair in m_BuffDefs)
+            {
+                colors[pair.Key] = pair.Value.Accent;
+            }
+
+            return colors;
+        }
+
+        private static ChartDefinition LoadChart(EnemyDefinition enemy)
+        {
+            string id = enemy != null && !string.IsNullOrEmpty(enemy.Id) ? enemy.Id : RunState.CurrentEnemyId;
+            var definition = Resources.Load<ChartDefinition>("Charts/chart_" + id);
+            if (definition == null)
+            {
+                Debug.LogWarning("[BATTLE] 找不到谱面 Resources/Charts/chart_" + id);
+            }
+
+            return definition;
         }
 
         private static EnemyDefinition LoadEnemy()
@@ -275,39 +296,6 @@ namespace CardRhythm.Rhythm
             }
 
             return enemy;
-        }
-
-        private static List<CardSpec> BuildDeck(List<CardDefinition> cards)
-        {
-            if (cards.Count == 0)
-            {
-                var fallback = new List<CardSpec>(DeckSize);
-                for (int i = 0; i < DeckSize; i++)
-                {
-                    fallback.Add(new CardSpec("placeholder", 1, CardPattern.Sequence, 0, Color.white));
-                }
-
-                return fallback;
-            }
-
-            var deck = new List<CardSpec>(cards.Count);
-            foreach (CardDefinition card in cards)
-            {
-                deck.Add(new CardSpec(card.Id, Mathf.Clamp(card.NoteCount, 1, 4), card.Pattern, card.EffectiveSeed, card.Accent));
-            }
-
-            return deck;
-        }
-
-        private static Dictionary<string, Color> BuildColors(List<CardSpec> deck)
-        {
-            var colors = new Dictionary<string, Color>();
-            foreach (CardSpec card in deck)
-            {
-                colors[card.Id] = card.Color;
-            }
-
-            return colors;
         }
     }
 }

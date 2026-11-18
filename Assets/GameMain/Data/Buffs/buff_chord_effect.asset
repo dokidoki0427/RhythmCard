@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d014861f0c4ca584fac9f5866bfd6682, type: 3}
   m_Name: buff_chord_effect
   m_EditorClassIdentifier: 
-  m_Damage: 18
+  m_Damage: 60

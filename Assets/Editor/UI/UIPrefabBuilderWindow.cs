@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using CardRhythm.UI;
 using UnityEditor;
@@ -130,11 +130,11 @@ namespace CardRhythm.EditorUI
             Rect(root.transform, "Rule", new Vector2(760f, 2f), new Vector2(0f, 130f), new Color(0.15f, 0.13f, 0.11f, 0.25f));
 
             Button(root.transform, "StartButton", "开 始 游 戏", new Vector2(460f, 92f), new Vector2(0f, 20f), SheetTheme.Ink, SheetTheme.Parchment, 32);
-            Button(root.transform, "DeckButton", "牌 组", new Vector2(300f, 68f), new Vector2(0f, -90f), SheetTheme.ParchmentDark, SheetTheme.Ink, 26);
+            Button(root.transform, "DeckButton", "B U F F", new Vector2(300f, 68f), new Vector2(0f, -90f), SheetTheme.ParchmentDark, SheetTheme.Ink, 26);
             Button(root.transform, "SettingsButton", "设 置", new Vector2(300f, 68f), new Vector2(0f, -178f), SheetTheme.ParchmentDark, SheetTheme.Ink, 26);
             Button(root.transform, "QuitButton", "退 出", new Vector2(300f, 68f), new Vector2(0f, -266f), new Color(0.86f, 0.80f, 0.67f, 0.6f), SheetTheme.Ink, 26);
 
-            Text(root.transform, "Hint", "Space 开始 · B 牌组 · O 设置", 22, new Vector2(0f, -380f), new Vector2(900f, 40f), new Color(0.15f, 0.13f, 0.11f, 0.55f));
+            Text(root.transform, "Hint", "Space 开始 · B Buff · O 设置", 22, new Vector2(0f, -380f), new Vector2(900f, 40f), new Color(0.15f, 0.13f, 0.11f, 0.55f));
             return root;
         }
 

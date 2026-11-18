@@ -19,6 +19,7 @@ namespace CardRhythm.UI
 
         private Text m_OffsetLabel;
         private Text m_StatusLabel;
+        private Text m_RewardLabel;
         private readonly Text[] m_KeyLabels = new Text[4];
         private int m_RebindingLane = -1;
         private AudioSource m_Audio;
@@ -37,6 +38,7 @@ namespace CardRhythm.UI
 
             RefreshOffset();
             RefreshKeys();
+            RefreshReward();
             SetStatus("按 Esc 关闭");
         }
 
@@ -161,10 +163,31 @@ namespace CardRhythm.UI
                 SheetTheme.Gold, SheetTheme.Ink, 24);
 
             m_StatusLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
-                SheetTheme.InkSoft, new Vector2(800f, 70f), new Vector2(0f, -150f));
+                SheetTheme.InkSoft, new Vector2(800f, 50f), new Vector2(0f, -125f));
 
-            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -235f), Close,
+            m_RewardLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
+                SheetTheme.Ink, new Vector2(400f, 40f), new Vector2(0f, -185f));
+            UIWidgets.Button(panel, "-", new Vector2(56f, 44f), new Vector2(-230f, -185f), () => AdjustReward(-1),
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+", new Vector2(56f, 44f), new Vector2(230f, -185f), () => AdjustReward(1),
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+
+            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -255f), Close,
                 SheetTheme.Ink, SheetTheme.Parchment, 24);
+        }
+
+        private void AdjustReward(int delta)
+        {
+            GameSettings.RewardEveryBattles = GameSettings.RewardEveryBattles + delta;
+            RefreshReward();
+        }
+
+        private void RefreshReward()
+        {
+            if (m_RewardLabel != null)
+            {
+                m_RewardLabel.text = "每 " + GameSettings.RewardEveryBattles + " 场战斗给一次 Buff 选择";
+            }
         }
 
         private void AdjustOffset(int delta)

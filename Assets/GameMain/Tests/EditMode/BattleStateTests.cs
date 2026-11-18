@@ -1,53 +1,112 @@
-using System.Collections.Generic;
 using CardRhythm.Battle;
+using CardRhythm.Cards;
 using CardRhythm.Rhythm;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace CardRhythm.Tests.EditMode
 {
-    /// <summary>战斗数值：伤害拆分、Miss 吞效果、强拍加成、敌人行动节奏、胜负。</summary>
+    /// <summary>战斗数值：判定只计分、Buff 按判定权重结算、敌人行动节奏、胜负。</summary>
     public class BattleStateTests
     {
-        [Test]
-        public void Perfect_DealsFullDamageAndScores()
+        private static CardDefinition MakeDamageBuff(string id, int damage)
         {
-            var state = new BattleState();
-            state.ApplyJudgement(Judgement.Perfect, 10f, false);
+            var effect = ScriptableObject.CreateInstance<DamageEffect>();
+            effect.Damage = damage;
+            var buff = ScriptableObject.CreateInstance<CardDefinition>();
+            buff.Id = id;
+            buff.DisplayName = id;
+            buff.Effect = effect;
+            return buff;
+        }
 
-            Assert.AreEqual(290f, state.EnemyHp, 0.001f);
-            Assert.AreEqual(100, state.Score);
-            Assert.AreEqual(1, state.Combo);
-            Assert.AreEqual(1, state.Perfect);
+        private static CardDefinition MakeHealBuff(string id, int heal)
+        {
+            var effect = ScriptableObject.CreateInstance<HealEffect>();
+            effect.Heal = heal;
+            var buff = ScriptableObject.CreateInstance<CardDefinition>();
+            buff.Id = id;
+            buff.DisplayName = id;
+            buff.Effect = effect;
+            return buff;
         }
 
         [Test]
-        public void Miss_DealsNoDamageButCounts()
+        public void Perfect_ScoresButDealsNoDamage()
         {
             var state = new BattleState();
-            state.ApplyJudgement(Judgement.Miss, 10f, false);
+            state.ApplyJudgement(Judgement.Perfect);
 
-            Assert.AreEqual(300f, state.EnemyHp, 0.001f, "Miss 必须吞掉效果");
+            Assert.AreEqual(300f, state.EnemyHp, 0.001f, "普通音符不造成伤害");
+            Assert.AreEqual(100, state.Score);
+            Assert.AreEqual(1, state.Combo);
+        }
+
+        [Test]
+        public void Miss_CountsAndKeepsHp()
+        {
+            var state = new BattleState();
+            state.ApplyJudgement(Judgement.Miss);
+
+            Assert.AreEqual(300f, state.EnemyHp, 0.001f);
             Assert.AreEqual(0, state.Combo);
             Assert.AreEqual(1, state.Miss);
         }
 
         [Test]
-        public void Accent_MultipliesDamage()
+        public void Buff_PerfectDealsFullDamage()
         {
             var state = new BattleState();
-            state.ApplyJudgement(Judgement.Perfect, 10f, true);
+            state.RegisterBuff(MakeDamageBuff("buff_a", 10), 1);
+            state.ApplyJudgement(Judgement.Perfect);
+            bool activated = state.ApplyBuffNote("buff_a", Judgement.Perfect);
 
-            Assert.AreEqual(285f, state.EnemyHp, 0.001f);
+            Assert.IsTrue(activated);
+            Assert.AreEqual(290f, state.EnemyHp, 0.001f);
+        }
+
+        [Test]
+        public void Buff_ScalesWithJudgementWeights()
+        {
+            var state = new BattleState();
+            state.RegisterBuff(MakeDamageBuff("buff_b", 20), 2);
+            state.ApplyBuffNote("buff_b", Judgement.Perfect);
+            state.ApplyBuffNote("buff_b", Judgement.Good);
+
+            // (1.0 + 0.7) / 2 = 0.85 → 20 × 0.85 = 17
+            Assert.AreEqual(283f, state.EnemyHp, 0.001f);
+        }
+
+        [Test]
+        public void Buff_MissReducesActivation()
+        {
+            var state = new BattleState();
+            state.RegisterBuff(MakeDamageBuff("buff_c", 10), 2);
+            state.ApplyBuffNote("buff_c", Judgement.Perfect);
+            state.ApplyBuffNote("buff_c", Judgement.Miss);
+
+            // (1.0 + 0) / 2 = 0.5 → 5
+            Assert.AreEqual(295f, state.EnemyHp, 0.001f);
+        }
+
+        [Test]
+        public void Heal_RestoresPlayerHp()
+        {
+            var state = new BattleState { PlayerHp = 90f };
+            state.RegisterBuff(MakeHealBuff("buff_heal", 8), 1);
+            state.ApplyBuffNote("buff_heal", Judgement.Perfect);
+
+            Assert.AreEqual(98f, state.PlayerHp, 0.001f);
         }
 
         [Test]
         public void Enemy_AttacksEveryTwoNonPerfect()
         {
             var state = new BattleState();
-            state.ApplyJudgement(Judgement.Good, 0f, false);
+            state.ApplyJudgement(Judgement.Good);
             Assert.AreEqual(100f, state.PlayerHp, 0.001f);
 
-            state.ApplyJudgement(Judgement.Bad, 0f, false);
+            state.ApplyJudgement(Judgement.Bad);
             Assert.AreEqual(90f, state.PlayerHp, 0.001f);
         }
 
@@ -55,18 +114,34 @@ namespace CardRhythm.Tests.EditMode
         public void Perfect_DoesNotTriggerEnemyAttack()
         {
             var state = new BattleState();
-            state.ApplyJudgement(Judgement.Perfect, 0f, false);
-            state.ApplyJudgement(Judgement.Perfect, 0f, false);
+            state.ApplyJudgement(Judgement.Perfect);
+            state.ApplyJudgement(Judgement.Perfect);
 
             Assert.AreEqual(100f, state.PlayerHp, 0.001f);
+        }
+
+        [Test]
+        public void Shield_AbsorbsBuffDamage()
+        {
+            var state = new BattleState(240f, 12f, 2, EnemyBehavior.Shielded, 12f, 8, 0);
+            state.ApplyDamage(10f);
+            Assert.AreEqual(2f, state.ShieldHp, 0.001f);
+            Assert.AreEqual(240f, state.EnemyHp, 0.001f);
+
+            state.ApplyDamage(10f);
+            Assert.AreEqual(0f, state.ShieldHp, 0.001f);
+            Assert.AreEqual(232f, state.EnemyHp, 0.001f, "护盾溢出伤害打本体");
         }
 
         [Test]
         public void Victory_WhenEnemyHpReachesZero()
         {
             var state = new BattleState { EnemyHp = 5f };
-            state.ApplyJudgement(Judgement.Perfect, 10f, false);
+            state.ApplyJudgement(Judgement.Perfect);
 
+            Assert.IsFalse(state.IsVictory);
+
+            state.ApplyDamage(5f);
             Assert.IsTrue(state.IsVictory);
         }
 
@@ -74,8 +149,8 @@ namespace CardRhythm.Tests.EditMode
         public void Defeat_WhenPlayerHpReachesZero()
         {
             var state = new BattleState { PlayerHp = 10f };
-            state.ApplyJudgement(Judgement.Miss, 0f, false);
-            state.ApplyJudgement(Judgement.Miss, 0f, false);
+            state.ApplyJudgement(Judgement.Miss);
+            state.ApplyJudgement(Judgement.Miss);
 
             Assert.IsTrue(state.IsDefeat);
         }
@@ -84,8 +159,8 @@ namespace CardRhythm.Tests.EditMode
         public void BattleResult_CopiesState()
         {
             var state = new BattleState();
-            state.ApplyJudgement(Judgement.Perfect, 10f, false);
-            state.ApplyJudgement(Judgement.Good, 5f, false);
+            state.ApplyJudgement(Judgement.Perfect);
+            state.ApplyJudgement(Judgement.Good);
 
             BattleResult result = BattleResult.From(state, true);
             Assert.IsTrue(result.Victory);
@@ -95,29 +170,9 @@ namespace CardRhythm.Tests.EditMode
         }
 
         [Test]
-        public void Shield_IgnoresNormalHits()
-        {
-            var state = new BattleState(240f, 12f, 2, CardRhythm.Cards.EnemyBehavior.Shielded, 80f, 8, 0);
-            state.ApplyJudgement(Judgement.Perfect, 10f, false);
-
-            Assert.AreEqual(240f, state.EnemyHp, 0.001f, "护盾未破时普通命中无效");
-            Assert.AreEqual(80f, state.ShieldHp, 0.001f);
-        }
-
-        [Test]
-        public void Shield_BreaksWithAccentAndOverflows()
-        {
-            var state = new BattleState(240f, 12f, 2, CardRhythm.Cards.EnemyBehavior.Shielded, 12f, 8, 0);
-            state.ApplyJudgement(Judgement.Perfect, 10f, true);
-
-            Assert.AreEqual(0f, state.ShieldHp, 0.001f);
-            Assert.AreEqual(237f, state.EnemyHp, 0.001f, "护盾溢出伤害要打本体");
-        }
-
-        [Test]
         public void Disruptor_TicksOncePerBar()
         {
-            var state = new BattleState(260f, 8f, 1, CardRhythm.Cards.EnemyBehavior.Disruptor, 0f, 8, 6);
+            var state = new BattleState(260f, 8f, 1, EnemyBehavior.Disruptor, 0f, 8, 6);
 
             state.TickBar(8);
             state.TickBar(8);

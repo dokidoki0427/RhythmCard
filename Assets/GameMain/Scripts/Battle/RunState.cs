@@ -18,6 +18,7 @@ namespace CardRhythm.Battle
     {
         public const int MaxLayer = 8;
         private const string LayerKey = "run.layer";
+        private const string BattlesKey = "run.battlesSinceReward";
 
         /// <summary>8 层节点：战斗 5、事件 1、精英 1、Boss 1。</summary>
         public static readonly MapNodeType[] Nodes =
@@ -68,6 +69,29 @@ namespace CardRhythm.Battle
         public static bool IsLastLayer
         {
             get { return Layer >= MaxLayer; }
+        }
+
+        /// <summary>距离上次 Buff 奖励已经打了几场胜仗。</summary>
+        public static int BattlesSinceReward
+        {
+            get { return Mathf.Max(0, PlayerPrefs.GetInt(BattlesKey, 0)); }
+            set
+            {
+                PlayerPrefs.SetInt(BattlesKey, Mathf.Max(0, value));
+                PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>本场胜利后累计；返回当前是否该给奖励。</summary>
+        public static bool NotifyVictoryAndCheckReward()
+        {
+            BattlesSinceReward = BattlesSinceReward + 1;
+            return BattlesSinceReward >= CardRhythm.Settings.GameSettings.RewardEveryBattles;
+        }
+
+        public static void ConsumeReward()
+        {
+            BattlesSinceReward = 0;
         }
 
         /// <summary>推进一层；Boss 之后回到第 1 层（新一局）。</summary>

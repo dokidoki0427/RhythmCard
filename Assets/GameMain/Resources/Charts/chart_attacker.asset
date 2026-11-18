@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9656f313f430c824087b9314c6de3b4b, type: 3}
+  m_Script: {fileID: 11500000, guid: fb12ef6211aa1764b89117c778c253ab, type: 3}
   m_Name: chart_attacker
   m_EditorClassIdentifier: 
   m_Id: chart_attacker
@@ -67,128 +67,192 @@ MonoBehaviour:
     SlotId: 
   - Bar: 4
     Slot: 0
+    Lane: 1
+    SlotId: S2
+  - Bar: 4
+    Slot: 2
     Lane: 3
-    SlotId: 
+    SlotId: S2
   - Bar: 4
     Slot: 4
-    Lane: 1
-    SlotId: 
-  - Bar: 5
-    Slot: 0
-    Lane: 0
-    SlotId: 
-  - Bar: 5
-    Slot: 4
-    Lane: 2
-    SlotId: 
-  - Bar: 6
-    Slot: 0
-    Lane: 1
-    SlotId: S2
-  - Bar: 6
-    Slot: 2
-    Lane: 3
-    SlotId: S2
-  - Bar: 6
-    Slot: 4
     Lane: 2
     SlotId: S2
-  - Bar: 6
+  - Bar: 4
     Slot: 6
     Lane: 0
     SlotId: S2
+  - Bar: 5
+    Slot: 0
+    Lane: 0
+    SlotId: S2
+  - Bar: 5
+    Slot: 0
+    Lane: 0
+    SlotId: 
+  - Bar: 5
+    Slot: 2
+    Lane: 2
+    SlotId: S2
+  - Bar: 5
+    Slot: 4
+    Lane: 2
+    SlotId: 
+  - Bar: 6
+    Slot: 0
+    Lane: 3
+    SlotId: S3
+  - Bar: 6
+    Slot: 2
+    Lane: 2
+    SlotId: S3
+  - Bar: 6
+    Slot: 4
+    Lane: 0
+    SlotId: S3
+  - Bar: 6
+    Slot: 6
+    Lane: 0
+    SlotId: S3
+  - Bar: 7
+    Slot: 0
+    Lane: 2
+    SlotId: S3
   - Bar: 7
     Slot: 0
     Lane: 2
     SlotId: 
   - Bar: 7
-    Slot: 0
-    Lane: 0
-    SlotId: S2
-  - Bar: 7
     Slot: 2
-    Lane: 2
-    SlotId: S2
+    Lane: 1
+    SlotId: S3
   - Bar: 7
     Slot: 4
     Lane: 0
     SlotId: 
   - Bar: 8
     Slot: 0
-    Lane: 3
-    SlotId: 
+    Lane: 2
+    SlotId: S4
+  - Bar: 8
+    Slot: 2
+    Lane: 0
+    SlotId: S4
   - Bar: 8
     Slot: 4
-    Lane: 1
-    SlotId: 
+    Lane: 0
+    SlotId: S4
+  - Bar: 8
+    Slot: 6
+    Lane: 2
+    SlotId: S4
   - Bar: 9
     Slot: 0
     Lane: 0
     SlotId: 
+  - Bar: 9
+    Slot: 0
+    Lane: 1
+    SlotId: S4
+  - Bar: 9
+    Slot: 2
+    Lane: 3
+    SlotId: S4
   - Bar: 9
     Slot: 4
     Lane: 2
     SlotId: 
   - Bar: 10
     Slot: 0
-    Lane: 3
-    SlotId: S3
+    Lane: 0
+    SlotId: S5
   - Bar: 10
     Slot: 2
-    Lane: 2
-    SlotId: S3
+    Lane: 0
+    SlotId: S5
   - Bar: 10
     Slot: 4
-    Lane: 0
-    SlotId: S3
+    Lane: 2
+    SlotId: S5
   - Bar: 10
     Slot: 6
-    Lane: 0
-    SlotId: S3
-  - Bar: 11
-    Slot: 0
-    Lane: 2
-    SlotId: S3
+    Lane: 1
+    SlotId: S5
   - Bar: 11
     Slot: 0
     Lane: 2
     SlotId: 
+  - Bar: 11
+    Slot: 0
+    Lane: 3
+    SlotId: S5
   - Bar: 11
     Slot: 2
-    Lane: 1
-    SlotId: S3
+    Lane: 2
+    SlotId: S5
   - Bar: 11
     Slot: 4
     Lane: 0
     SlotId: 
   - Bar: 12
     Slot: 0
-    Lane: 3
-    SlotId: 
+    Lane: 0
+    SlotId: S6
+  - Bar: 12
+    Slot: 2
+    Lane: 2
+    SlotId: S6
   - Bar: 12
     Slot: 4
     Lane: 1
-    SlotId: 
+    SlotId: S6
+  - Bar: 12
+    Slot: 6
+    Lane: 3
+    SlotId: S6
+  - Bar: 13
+    Slot: 0
+    Lane: 2
+    SlotId: S6
   - Bar: 13
     Slot: 0
     Lane: 0
     SlotId: 
+  - Bar: 13
+    Slot: 2
+    Lane: 0
+    SlotId: S6
   - Bar: 13
     Slot: 4
     Lane: 2
     SlotId: 
   - Bar: 14
     Slot: 0
+    Lane: 2
+    SlotId: S7
+  - Bar: 14
+    Slot: 2
     Lane: 1
-    SlotId: 
+    SlotId: S7
   - Bar: 14
     Slot: 4
     Lane: 3
-    SlotId: 
+    SlotId: S7
+  - Bar: 14
+    Slot: 6
+    Lane: 2
+    SlotId: S7
+  - Bar: 15
+    Slot: 0
+    Lane: 0
+    SlotId: S7
   - Bar: 15
     Slot: 0
     Lane: 2
     SlotId: 
+  - Bar: 15
+    Slot: 2
+    Lane: 0
+    SlotId: S7
   - Bar: 15
     Slot: 4
     Lane: 0

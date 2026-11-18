@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CardRhythm.Rhythm
 {
@@ -9,15 +9,15 @@ namespace CardRhythm.Rhythm
         public int Slot;
         public int Lane;
         public float Time;
-        public string SourceCardId;
+        public string BuffId;
 
-        public NoteData(int bar, int slot, int lane, float time, string sourceCardId)
+        public NoteData(int bar, int slot, int lane, float time, string buffId)
         {
             Bar = bar;
             Slot = slot;
             Lane = lane;
             Time = time;
-            SourceCardId = sourceCardId;
+            BuffId = buffId;
         }
     }
 

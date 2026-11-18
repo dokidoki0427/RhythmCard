@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using CardRhythm.Cards;
 using CardRhythm.Settings;
 using UnityEngine;
@@ -50,9 +50,9 @@ namespace CardRhythm.UI
                 panelImage.color = SheetTheme.Parchment;
             }
 
-            UIWidgets.Label(m_Panel, "选 择 一 张 牌", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
+            UIWidgets.Label(m_Panel, "选 择 一 个 B U F F", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(900f, 60f), new Vector2(0f, 340f));
-            UIWidgets.Label(m_Panel, "点击加入牌组 · 也可以跳过", 24, TextAnchor.MiddleCenter,
+            UIWidgets.Label(m_Panel, "自动填进谱面槽位 · 满 3 个会替换最早的一个", 24, TextAnchor.MiddleCenter,
                 SheetTheme.InkSoft, new Vector2(900f, 40f), new Vector2(0f, 290f));
 
             m_Slots = UIWidgets.Panel(m_Panel, "Slots", new Vector2(1180f, 440f), new Vector2(0f, 20f),
@@ -69,7 +69,7 @@ namespace CardRhythm.UI
                 Destroy(m_Slots.GetChild(i).gameObject);
             }
 
-            var cards = Resources.LoadAll<CardDefinition>("Cards")
+            var cards = Resources.LoadAll<CardDefinition>("Buffs")
                 .Where(c => c != null)
                 .OrderBy(c => c.Id)
                 .ToList();

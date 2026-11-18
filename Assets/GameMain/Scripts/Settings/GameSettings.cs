@@ -11,6 +11,19 @@ namespace CardRhythm.Settings
     {
         public const string OffsetKey = "rhythm.offsetMs";
         public const string DeckKey = "rhythm.deckIds";
+        public const string RewardEveryKey = "rhythm.rewardEvery";
+        public const int MaxBuffs = 3;
+
+        /// <summary>每 N 场战斗给一次 Buff 三选一（测试期默认 1，可在设置里调）。</summary>
+        public static int RewardEveryBattles
+        {
+            get { return Mathf.Clamp(PlayerPrefs.GetInt(RewardEveryKey, 1), 1, 9); }
+            set
+            {
+                PlayerPrefs.SetInt(RewardEveryKey, Mathf.Clamp(value, 1, 9));
+                PlayerPrefs.Save();
+            }
+        }
 
         public static int OffsetMs
         {
@@ -68,8 +81,8 @@ namespace CardRhythm.Settings
             PlayerPrefs.Save();
         }
 
-        /// <summary>向牌组追加一张（允许重复），达到上限返回 false。</summary>
-        public static bool AppendToDeck(string id, int maxCards = 20)
+        /// <summary>向 Buff 列表追加一个；已满时替换最早的一个（“超了允许替换”）。</summary>
+        public static bool AppendToDeck(string id, int maxCards = MaxBuffs)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -79,7 +92,7 @@ namespace CardRhythm.Settings
             List<string> ids = LoadDeck();
             if (ids.Count >= maxCards)
             {
-                return false;
+                ids.RemoveAt(0);
             }
 
             ids.Add(id);

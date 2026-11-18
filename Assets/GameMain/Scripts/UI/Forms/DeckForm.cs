@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CardRhythm.Cards;
 using CardRhythm.Settings;
@@ -13,7 +13,7 @@ namespace CardRhythm.UI
     /// </summary>
     public sealed class DeckForm : UIFormBase
     {
-        private const int DeckSize = 20;
+        private const int DeckSize = 3;
         private const int Columns = 3;
 
         private readonly HashSet<string> m_Selected = new HashSet<string>();
@@ -59,7 +59,7 @@ namespace CardRhythm.UI
                 panelImage.color = SheetTheme.Parchment;
             }
 
-            UIWidgets.Label(panel, "牌 组", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
+            UIWidgets.Label(panel, "B U F F", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
                 new Vector2(800f, 60f), new Vector2(0f, 350f));
 
             m_CountLabel = UIWidgets.Label(panel, "0 / 20", 28, TextAnchor.MiddleCenter,
@@ -179,7 +179,7 @@ namespace CardRhythm.UI
 
         private static List<CardDefinition> LoadCards()
         {
-            var cards = new List<CardDefinition>(Resources.LoadAll<CardDefinition>("Cards"));
+            var cards = new List<CardDefinition>(Resources.LoadAll<CardDefinition>("Buffs"));
             cards.Sort((a, b) => string.CompareOrdinal(a.Id, b.Id));
             return cards;
         }

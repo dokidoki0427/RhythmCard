@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CardRhythm.Cards;
 using CardRhythm.Rhythm;
 using NUnit.Framework;
@@ -32,7 +32,7 @@ namespace CardRhythm.Tests.EditMode
             {
                 Assert.AreEqual(first.Notes[i].Time, second.Notes[i].Time, 0.0001f);
                 Assert.AreEqual(first.Notes[i].Lane, second.Notes[i].Lane);
-                Assert.AreEqual(first.Notes[i].SourceCardId, second.Notes[i].SourceCardId);
+                Assert.AreEqual(first.Notes[i].BuffId, second.Notes[i].BuffId);
             }
         }
 

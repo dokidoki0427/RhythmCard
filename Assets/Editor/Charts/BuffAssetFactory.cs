@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CardRhythm.Cards;
 using UnityEditor;
 using UnityEngine;
@@ -27,12 +27,12 @@ namespace CardRhythm.EditorCharts
         public static void GenerateAll()
         {
             EnsureFolder();
-            CreateBuff("buff_heavy", "重音", "一次沉重的打击。", new Color(0.86f, 0.32f, 0.30f), 12);
-            CreateBuff("buff_chord", "和弦", "三个音同时落下。", new Color(0.92f, 0.55f, 0.20f), 18);
-            CreateBuff("buff_light", "跳音", "轻快但频繁。", new Color(0.35f, 0.62f, 1f), 6);
-            CreateBuff("buff_rest", "休止", "短暂的呼吸。", new Color(0.40f, 0.78f, 0.55f), 8, true);
-            CreateBuff("buff_echo", "回声", "余音绕梁。", new Color(0.55f, 0.55f, 0.85f), 14, true);
-            CreateBuff("buff_fermata", "延长", "一个长长的尾音。", new Color(0.80f, 0.70f, 0.95f), 20, true);
+            CreateBuff("buff_heavy", "重音", "一次沉重的打击。", new Color(0.86f, 0.32f, 0.30f), 40);
+            CreateBuff("buff_chord", "和弦", "三个音同时落下。", new Color(0.92f, 0.55f, 0.20f), 60);
+            CreateBuff("buff_light", "跳音", "轻快但频繁。", new Color(0.35f, 0.62f, 1f), 25);
+            CreateBuff("buff_rest", "休止", "短暂的呼吸。", new Color(0.40f, 0.78f, 0.55f), 25, true);
+            CreateBuff("buff_echo", "回声", "余音绕梁。", new Color(0.55f, 0.55f, 0.85f), 40, true);
+            CreateBuff("buff_fermata", "延长", "一个长长的尾音。", new Color(0.80f, 0.70f, 0.95f), 55, true);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

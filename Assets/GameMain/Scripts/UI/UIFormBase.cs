@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityGameFramework.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,10 +7,12 @@ namespace CardRhythm.UI
 {
     /// <summary>
     /// 所有界面的基类。GF 的 UIFormLogic 已经提供了 OnInit / OnOpen / OnClose / OnPause / OnResume，
-    /// 这里补：全屏拉伸（保证任何预制体根节点都铺满屏幕）、分组名、关闭自己。
+    /// 这里补：全屏拉伸（保证任何预制体根节点都铺满屏幕）、分组名、开关动画、关闭自己。
     /// </summary>
     public abstract class UIFormBase : UIFormLogic
     {
+        private bool m_Closing;
+
         /// <summary>界面当前所在的 UI 组（即层级名）。</summary>
         public string GroupName
         {
@@ -33,8 +36,15 @@ namespace CardRhythm.UI
         protected override void OnOpen(object userData)
         {
             base.OnOpen(userData);
+            m_Closing = false;
             StretchToScreen();
             ApplyRuntimeFont();
+
+            var rect = transform as RectTransform;
+            if (rect != null)
+            {
+                UIAnimator.PlayOpen(this, rect);
+            }
         }
 
         /// <summary>预制体里的文字用内置字体（避免资源依赖），运行时统一换成系统中文字体。</summary>
@@ -67,16 +77,31 @@ namespace CardRhythm.UI
             rect.localScale = Vector3.one;
         }
 
-        /// <summary>关闭自己。</summary>
+        /// <summary>关闭自己：先播淡出缩放，再真正关闭。</summary>
         public void Close()
         {
-            var uiComponent = GameEntry.GetComponent<UIComponent>();
-            if (uiComponent == null || UIForm == null)
+            if (m_Closing)
             {
                 return;
             }
 
-            uiComponent.CloseUIForm(UIForm);
+            m_Closing = true;
+            StartCoroutine(CloseRoutine());
+        }
+
+        private IEnumerator CloseRoutine()
+        {
+            var rect = transform as RectTransform;
+            if (rect != null)
+            {
+                yield return UIAnimator.PlayClose(this, rect);
+            }
+
+            var uiComponent = GameEntry.GetComponent<UIComponent>();
+            if (uiComponent != null && UIForm != null)
+            {
+                uiComponent.CloseUIForm(UIForm);
+            }
         }
     }
 }

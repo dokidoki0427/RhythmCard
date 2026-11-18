@@ -57,15 +57,17 @@ namespace CardRhythm.EditorCharts
             var notes = new List<ChartNote>();
             int seed = enemyId.GetHashCode();
 
-            // 三个 Buff 槽位：第 2、6、10 小节，各 6 个音符。
-            AddSlot(notes, 2, "S1", seed);
-            AddSlot(notes, 6, "S2", seed + 1);
-            AddSlot(notes, 10, "S3", seed + 2);
+            // 七个 Buff 槽位：第 2/4/6/8/10/12/14 小节，各 6 个音符。
+            var slotBars = new[] { 2, 4, 6, 8, 10, 12, 14 };
+            for (int i = 0; i < slotBars.Length; i++)
+            {
+                AddSlot(notes, slotBars[i], "S" + (i + 1), seed + i);
+            }
 
             // 普通填充音符：每小节 2 个，避开槽位小节。
             for (int bar = 0; bar < chart.Bars; bar++)
             {
-                if (bar == 2 || bar == 6 || bar == 10)
+                if (System.Array.IndexOf(slotBars, bar) >= 0)
                 {
                     continue;
                 }

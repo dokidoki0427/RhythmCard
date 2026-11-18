@@ -6,19 +6,24 @@ using GameFramework.Procedure;
 namespace CardRhythm.Procedure
 {
     /// <summary>
-    /// 结算：胜利后先三选一奖励，再推进一层；失败则重置进度回菜单。
+    /// 结算：胜利后按“每 N 场”给一次 Buff 三选一，再推进一层；失败则重置进度回菜单。
     /// </summary>
     public sealed class ProcedureResult : GameProcedureBase
     {
         private bool m_RewardShown;
         private bool m_WaitingReward;
+        private bool m_RewardDue;
 
         protected override void OnEnter(IFsm<IProcedureManager> procedureOwner)
         {
             base.OnEnter(procedureOwner);
             m_RewardShown = false;
             m_WaitingReward = false;
-            UIRouter.Open(UIFormId.Result, BattleResult.Last);
+
+            BattleResult result = BattleResult.Last;
+            m_RewardDue = result != null && result.Victory && RunState.NotifyVictoryAndCheckReward();
+
+            UIRouter.Open(UIFormId.Result, result);
         }
 
         protected override void OnLeave(IFsm<IProcedureManager> procedureOwner, bool isShutdown)
@@ -43,10 +48,12 @@ namespace CardRhythm.Procedure
         public override void RequestAdvance()
         {
             BattleResult result = BattleResult.Last;
-            if (result != null && result.Victory && !m_RewardShown)
+
+            if (result != null && result.Victory && m_RewardDue && !m_RewardShown)
             {
                 m_RewardShown = true;
                 m_WaitingReward = true;
+                RunState.ConsumeReward();
                 UIRouter.Open(UIFormId.Reward, null, true, true);
                 return;
             }
@@ -58,6 +65,7 @@ namespace CardRhythm.Procedure
             else
             {
                 RunState.ResetRun();
+                RunState.BattlesSinceReward = 0;
             }
 
             ChangeTo<ProcedureMap>();

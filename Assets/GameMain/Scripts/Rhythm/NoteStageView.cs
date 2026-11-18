@@ -26,6 +26,14 @@ namespace CardRhythm.Rhythm
         private const float NoteHeight = 26f;
         private const float PopupLifetime = 0.55f;
 
+        private static readonly Color[] LaneColors =
+        {
+            new Color(0.45f, 0.70f, 1.00f, 1f),
+            new Color(0.55f, 0.85f, 0.95f, 1f),
+            new Color(0.95f, 0.65f, 0.85f, 1f),
+            new Color(1.00f, 0.80f, 0.45f, 1f),
+        };
+
         private readonly List<Image> m_NoteViews = new List<Image>();
         private readonly List<Image> m_KeyCaps = new List<Image>();
         private readonly List<Text> m_KeyLabels = new List<Text>();
@@ -52,7 +60,7 @@ namespace CardRhythm.Rhythm
         private Text m_EnemyHpText;
         private Text m_ComboText;
         private Text m_ScoreText;
-        private Text m_AccentText;
+        private Text m_BuffText;
         private Transform m_CanvasRoot;
         private float m_TravelSeconds = 1f;
 
@@ -139,7 +147,7 @@ namespace CardRhythm.Rhythm
             for (int i = 0; i < chart.Notes.Count; i++)
             {
                 NoteData note = chart.Notes[i];
-                var noteRect = CreateRect(canvasObject.transform, "Note_" + note.SourceCardId);
+                var noteRect = CreateRect(canvasObject.transform, "Note_" + note.BuffId);
                 noteRect.anchorMin = new Vector2(0f, 0f);
                 noteRect.anchorMax = new Vector2(0f, 0f);
                 noteRect.pivot = new Vector2(0.5f, 0.5f);
@@ -147,9 +155,9 @@ namespace CardRhythm.Rhythm
 
                 var image = noteRect.gameObject.AddComponent<Image>();
                 Color color;
-                if (!colors.TryGetValue(note.SourceCardId, out color))
+                if (string.IsNullOrEmpty(note.BuffId) || !colors.TryGetValue(note.BuffId, out color))
                 {
-                    color = Color.cyan;
+                    color = LaneColors[note.Lane & 3];
                 }
 
                 color.a = 0.95f;
@@ -380,11 +388,11 @@ namespace CardRhythm.Rhythm
             m_ScoreText.rectTransform.sizeDelta = new Vector2(400f, 32f);
             m_ScoreText.rectTransform.anchoredPosition = new Vector2(0f, -96f);
 
-            m_AccentText = CreateText(canvasRoot, string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.78f, 0.62f, 0.24f, 1f));
-            m_AccentText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
-            m_AccentText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
-            m_AccentText.rectTransform.sizeDelta = new Vector2(400f, 30f);
-            m_AccentText.rectTransform.anchoredPosition = new Vector2(0f, -128f);
+            m_BuffText = CreateText(canvasRoot, string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.78f, 0.62f, 0.24f, 0.95f));
+            m_BuffText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            m_BuffText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            m_BuffText.rectTransform.sizeDelta = new Vector2(900f, 30f);
+            m_BuffText.rectTransform.anchoredPosition = new Vector2(0f, -132f);
 
             Text layerText = CreateText(canvasRoot, "LAYER " + RunState.Layer + " / " + RunState.MaxLayer, 24,
                 TextAnchor.MiddleLeft, new Color(1f, 1f, 1f, 0.7f));
@@ -432,10 +440,7 @@ namespace CardRhythm.Rhythm
 
         public void SetAccentArmed(bool armed)
         {
-            if (m_AccentText != null)
-            {
-                m_AccentText.text = armed ? "ACCENT ARMED" : string.Empty;
-            }
+            // 强拍机制已移除，保留空方法避免旧调用点报错。
         }
 
         private void UpdateHud()
@@ -456,6 +461,22 @@ namespace CardRhythm.Rhythm
 
             m_ComboText.text = "COMBO " + m_State.Combo;
             m_ScoreText.text = "SCORE " + m_State.Score;
+
+            if (m_BuffText != null)
+            {
+                var builder = new System.Text.StringBuilder();
+                foreach (BuffProgress buff in m_State.Buffs)
+                {
+                    if (builder.Length > 0)
+                    {
+                        builder.Append("    ");
+                    }
+
+                    builder.Append(buff.DisplayName).Append(' ').Append(buff.Judged).Append('/').Append(buff.Required);
+                }
+
+                m_BuffText.text = builder.ToString();
+            }
         }
 
         private void OnJudged(NoteData note, Judgement judgement)
