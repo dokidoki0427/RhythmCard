@@ -50,6 +50,10 @@ namespace CardRhythm.Rhythm
             ChartDefinition definition = LoadChart(enemy);
             m_Bpm = definition != null ? definition.Bpm : bpm;
             Chart = BuildChart(definition);
+            Debug.Log("[BATTLE] chart=" + (definition != null ? definition.Id : "null")
+                + " enemy=" + m_EnemyName
+                + " notes=" + Chart.Notes.Count
+                + " buffs=" + m_Assigned.Count);
 
             m_Conductor = gameObject.AddComponent<Conductor>();
             m_View = gameObject.AddComponent<NoteStageView>();
@@ -239,9 +243,20 @@ namespace CardRhythm.Rhythm
 
             if (result.Count == 0)
             {
-                // 首次运行没有存档：自动发三个基础 Buff，保证能直接开打。
+                // 首次运行没有存档：优先发伤害 Buff，保证第一关打得动。
                 var all = Resources.LoadAll<CardDefinition>("Buffs");
-                System.Array.Sort(all, (a, b) => string.CompareOrdinal(a.Id, b.Id));
+                System.Array.Sort(all, (a, b) =>
+                {
+                    bool aDamage = a.Effect is DamageEffect;
+                    bool bDamage = b.Effect is DamageEffect;
+                    if (aDamage != bDamage)
+                    {
+                        return aDamage ? -1 : 1;
+                    }
+
+                    return string.CompareOrdinal(a.Id, b.Id);
+                });
+
                 var ids = new List<string>();
                 for (int i = 0; i < all.Length && i < MaxBuffs; i++)
                 {

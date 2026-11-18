@@ -57,8 +57,8 @@ namespace CardRhythm.EditorCharts
             var notes = new List<ChartNote>();
             int seed = enemyId.GetHashCode();
 
-            // 七个 Buff 槽位：第 2/4/6/8/10/12/14 小节，各 6 个音符。
-            var slotBars = new[] { 2, 4, 6, 8, 10, 12, 14 };
+            // 八个 Buff 槽位：奇数小节各 4 个音符，一个槽位正好对应一个 Buff。
+            var slotBars = new[] { 1, 3, 5, 7, 9, 11, 13, 15 };
             for (int i = 0; i < slotBars.Length; i++)
             {
                 AddSlot(notes, slotBars[i], "S" + (i + 1), seed + i);
@@ -81,13 +81,12 @@ namespace CardRhythm.EditorCharts
             EditorUtility.SetDirty(chart);
         }
 
-        private static void AddSlot(List<ChartNote> notes, int startBar, string slotId, int seed)
+        private static void AddSlot(List<ChartNote> notes, int bar, string slotId, int seed)
         {
-            int[] lanes = { 0, 2, 1, 3, 2, 0 };
-            for (int i = 0; i < 6; i++)
+            int[] lanes = { 0, 2, 1, 3 };
+            for (int i = 0; i < 4; i++)
             {
-                int bar = startBar + i / 4;
-                int slot = (i % 4) * 2;
+                int slot = i * 2;
                 int laneIndex = ((i + seed) % lanes.Length + lanes.Length) % lanes.Length;
                 notes.Add(new ChartNote
                 {

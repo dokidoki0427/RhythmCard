@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CardRhythm.Cards;
+using CardRhythm.Charts;
 using CardRhythm.UI;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -137,6 +138,7 @@ namespace CardRhythm.EditorAutomation
                 CheckBuildScenes(checks);
                 CheckUIForms(checks);
                 CheckCards(checks);
+                CheckCharts(checks);
             }
             catch (Exception exception)
             {
@@ -236,6 +238,51 @@ namespace CardRhythm.EditorAutomation
             else
             {
                 AddCheck(checks, "cards", "FAIL", string.Join(" | ", errors));
+            }
+        }
+
+        private static void CheckCharts(List<Check> checks)
+        {
+            var errors = new List<string>();
+            int chartCount = 0;
+
+            foreach (string guid in AssetDatabase.FindAssets("t:ChartDefinition", new[] { "Assets/GameMain/Resources/Charts" }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var chart = AssetDatabase.LoadAssetAtPath<ChartDefinition>(path);
+                if (chart == null)
+                {
+                    errors.Add(path + ": 脚本引用丢失");
+                    continue;
+                }
+
+                chartCount++;
+                if (chart.Notes.Count == 0)
+                {
+                    errors.Add(chart.Id + ": 没有音符");
+                }
+
+                if (chart.SlotIds().Count == 0)
+                {
+                    errors.Add(chart.Id + ": 没有 Buff 槽位");
+                }
+            }
+
+            foreach (CardDefinition buff in Resources.LoadAll<CardDefinition>("Buffs"))
+            {
+                if (buff.Effect == null)
+                {
+                    errors.Add("Buff " + buff.Id + ": 没有效果");
+                }
+            }
+
+            if (errors.Count == 0)
+            {
+                AddCheck(checks, "charts", "PASS", "charts=" + chartCount);
+            }
+            else
+            {
+                AddCheck(checks, "charts", "FAIL", string.Join(" | ", errors));
             }
         }
 
