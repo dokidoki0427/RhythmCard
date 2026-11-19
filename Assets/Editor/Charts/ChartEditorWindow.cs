@@ -20,6 +20,8 @@ namespace CardRhythm.EditorCharts
         private Vector2 m_Scroll;
         private string m_SlotId = "S1";
         private bool m_SlotMode;
+        private bool m_HoldMode;
+        private int m_HoldLength = 4;
 
         [MenuItem("Tools/卡牌音游/谱面编辑器", false, 72)]
         public static void Open()
@@ -96,6 +98,9 @@ namespace CardRhythm.EditorCharts
                 }
 
                 GUILayout.FlexibleSpace();
+                m_HoldMode = GUILayout.Toggle(m_HoldMode, "长按", EditorStyles.toolbarButton, GUILayout.Width(54f));
+                m_HoldLength = Mathf.Clamp(EditorGUILayout.IntField(m_HoldLength, GUILayout.Width(36f)), 1, 32);
+                GUILayout.Label("格", GUILayout.Width(18f));
                 m_SlotMode = GUILayout.Toggle(m_SlotMode, "槽位模式", EditorStyles.toolbarButton, GUILayout.Width(80f));
                 m_SlotId = EditorGUILayout.TextField(m_SlotId, GUILayout.Width(60f));
                 if (GUILayout.Button("校验", EditorStyles.toolbarButton, GUILayout.Width(60f)))
@@ -123,14 +128,15 @@ namespace CardRhythm.EditorCharts
                 {
                     for (int lane = 0; lane < Lanes; lane++)
                     {
-                        bool has = HasNote(bar, slot, lane);
+                        ChartNote found = FindNote(bar, slot, lane);
+                        bool has = found.Bar == bar && found.Lane == lane && found.Slot == slot;
                         var style = new GUIStyle(GUI.skin.button) { fontSize = 9 };
                         if (has)
                         {
                             style.normal.textColor = Color.black;
                         }
 
-                        string label = has ? "●" : "·";
+                        string label = has ? (found.LengthSlots > 0 ? "H" : "●") : "·";
                         if (GUILayout.Button(label, style, GUILayout.Width(26f), GUILayout.Height(20f)))
                         {
                             ToggleNote(bar, slot, lane);
@@ -140,6 +146,19 @@ namespace CardRhythm.EditorCharts
                     GUILayout.Space(4f);
                 }
             }
+        }
+
+        private ChartNote FindNote(int bar, int slot, int lane)
+        {
+            foreach (ChartNote note in m_Chart.Notes)
+            {
+                if (note.Bar == bar && note.Slot == slot && note.Lane == lane)
+                {
+                    return note;
+                }
+            }
+
+            return new ChartNote { Bar = -1 };
         }
 
         private bool HasNote(int bar, int slot, int lane)
@@ -174,6 +193,7 @@ namespace CardRhythm.EditorCharts
                 Slot = slot,
                 Lane = lane,
                 SlotId = m_SlotMode ? m_SlotId : string.Empty,
+                LengthSlots = m_HoldMode ? m_HoldLength : 0,
             });
             MarkDirty();
         }

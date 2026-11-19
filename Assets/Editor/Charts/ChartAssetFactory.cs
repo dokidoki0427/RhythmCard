@@ -73,7 +73,13 @@ namespace CardRhythm.EditorCharts
                 }
 
                 notes.Add(new ChartNote { Bar = bar, Slot = 0, Lane = (bar + seed) & 3 });
-                notes.Add(new ChartNote { Bar = bar, Slot = 4, Lane = (bar + seed + 2) & 3 });
+                notes.Add(new ChartNote
+                {
+                    Bar = bar,
+                    Slot = 4,
+                    Lane = (bar + seed + 2) & 3,
+                    LengthSlots = bar % 4 == 0 ? 4 : 0,
+                });
             }
 
             notes.Sort((a, b) => (a.Bar * 8 + a.Slot).CompareTo(b.Bar * 8 + b.Slot));

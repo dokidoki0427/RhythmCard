@@ -171,6 +171,20 @@ namespace CardRhythm.Rhythm
                 {
                     ApplyBuffIcon(noteRect, image, note.BuffId);
                 }
+
+                if (note.Type == NoteType.Hold && note.Duration > 0f)
+                {
+                    float bodyHeight = note.Duration / m_TravelSeconds * (ReferenceHeight - JudgeLineY);
+                    var body = CreateRect(noteRect, "HoldBody");
+                    body.anchorMin = new Vector2(0.5f, 0.5f);
+                    body.anchorMax = new Vector2(0.5f, 0.5f);
+                    body.sizeDelta = new Vector2(NoteWidth * 0.55f, bodyHeight);
+                    body.anchoredPosition = new Vector2(0f, bodyHeight * 0.5f);
+
+                    var bodyImage = body.gameObject.AddComponent<Image>();
+                    bodyImage.color = new Color(color.r, color.g, color.b, 0.35f);
+                    bodyImage.raycastTarget = false;
+                }
             }
 
             BuildPopupPool();

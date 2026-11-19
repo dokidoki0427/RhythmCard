@@ -270,6 +270,20 @@ namespace CardRhythm.Battle
             }
         }
 
+        /// <summary>长按尾部结算：按满加分，提前松开算 Miss。</summary>
+        public void ApplyHoldResult(bool completed)
+        {
+            if (completed)
+            {
+                Score += 50;
+            }
+            else
+            {
+                Miss++;
+                Combo = 0;
+            }
+        }
+
         public void ApplyDamage(float amount)
         {
             if (amount <= 0f)

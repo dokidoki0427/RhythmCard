@@ -26,6 +26,7 @@ namespace CardRhythm.Rhythm
         private string m_EnemyName;
         private float m_Bpm;
         private float m_EndTime;
+        private readonly bool[] m_LaneHeld = new bool[4];
 
         public static BattleRunner Current { get; private set; }
 
@@ -62,6 +63,7 @@ namespace CardRhythm.Rhythm
 
             Judger = new Judger(Chart);
             Judger.JudgedEvent += OnJudged;
+            Judger.HoldJudgedEvent += OnHoldJudged;
             m_View.Build(Chart, m_Conductor, BuildColors(), Judger, m_State, m_EnemyName);
 
             m_EndTime = Chart.Duration + 2f;
@@ -79,6 +81,7 @@ namespace CardRhythm.Rhythm
             if (Judger != null)
             {
                 Judger.JudgedEvent -= OnJudged;
+                Judger.HoldJudgedEvent -= OnHoldJudged;
             }
         }
 
@@ -106,7 +109,12 @@ namespace CardRhythm.Rhythm
             }
 
             float songTime = m_Conductor.SongTime;
-            Judger.Update(songTime);
+            for (int lane = 0; lane < 4; lane++)
+            {
+                m_LaneHeld[lane] = InputKeys.LaneHeld(lane);
+            }
+
+            Judger.Update(songTime, m_LaneHeld);
             m_State.TickBar(Mathf.FloorToInt(songTime / (m_Conductor.SecondsPerBeat * 4f)));
 
             for (int lane = 0; lane < 4; lane++)
@@ -166,6 +174,11 @@ namespace CardRhythm.Rhythm
             }
         }
 
+        private void OnHoldJudged(NoteData note, bool completed)
+        {
+            m_State.ApplyHoldResult(completed);
+        }
+
         private void FinishBattle()
         {
             IsFinished = true;
@@ -218,7 +231,9 @@ namespace CardRhythm.Rhythm
                 }
 
                 float time = (note.Bar * 8 + note.Slot) * secondsPerSlot;
-                notes.Add(new NoteData(note.Bar, note.Slot, note.Lane, time, buffKey));
+                NoteType type = note.LengthSlots > 0 ? NoteType.Hold : NoteType.Tap;
+                float duration = Mathf.Max(0, note.LengthSlots) * secondsPerSlot;
+                notes.Add(new NoteData(note.Bar, note.Slot, note.Lane, time, buffKey, type, duration));
             }
 
             return new Chart(definition.Bpm, definition.Bars, 8, notes);

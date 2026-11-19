@@ -1,8 +1,15 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace CardRhythm.Rhythm
 {
-    /// <summary>一个音符。Time 是相对歌曲开始的时间（秒）。</summary>
+    /// <summary>音符类型：点击 / 长按。</summary>
+    public enum NoteType
+    {
+        Tap = 0,
+        Hold = 1,
+    }
+
+    /// <summary>一个音符。Time 是相对歌曲开始的时间（秒）；Hold 的 Duration &gt; 0。</summary>
     public struct NoteData
     {
         public int Bar;
@@ -10,14 +17,24 @@ namespace CardRhythm.Rhythm
         public int Lane;
         public float Time;
         public string BuffId;
+        public NoteType Type;
+        public float Duration;
 
-        public NoteData(int bar, int slot, int lane, float time, string buffId)
+        public float EndTime
+        {
+            get { return Time + Duration; }
+        }
+
+        public NoteData(int bar, int slot, int lane, float time, string buffId,
+            NoteType type = NoteType.Tap, float duration = 0f)
         {
             Bar = bar;
             Slot = slot;
             Lane = lane;
             Time = time;
             BuffId = buffId;
+            Type = type;
+            Duration = duration;
         }
     }
 

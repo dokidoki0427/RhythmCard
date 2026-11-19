@@ -12,6 +12,9 @@ namespace CardRhythm.Charts
         public int Slot;
         public int Lane;
         public string SlotId;
+
+        /// <summary>长按长度（1/8 格数）；0 表示普通点击。</summary>
+        public int LengthSlots;
     }
 
     /// <summary>
