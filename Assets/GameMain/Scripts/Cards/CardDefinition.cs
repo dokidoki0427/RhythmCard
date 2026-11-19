@@ -24,6 +24,13 @@ namespace CardRhythm.Cards
         Epic = 2,
     }
 
+    /// <summary>Buff 类型：攻击造成伤害，防御获得护甲（护甲先于生命被敌人打掉）。</summary>
+    public enum BuffType
+    {
+        Attack = 0,
+        Defense = 1,
+    }
+
     /// <summary>
     /// 卡牌数据。一个资产 = 一张牌。
     /// 这里只放“牌是什么、怎么落到音符上”，不放伤害/消耗这类战斗数值——
@@ -49,6 +56,9 @@ namespace CardRhythm.Cards
         [Header("表现")]
         [SerializeField] private Sprite m_Icon = null;
         [SerializeField] private Color m_Accent = new Color(0.35f, 0.62f, 1f, 1f);
+
+        [Header("Buff 类型")]
+        [SerializeField] private BuffType m_BuffType = BuffType.Attack;
 
         [Header("功能")]
         [SerializeField] private CardEffect m_Effect = null;
@@ -112,6 +122,12 @@ namespace CardRhythm.Cards
         {
             get { return m_Accent; }
             set { m_Accent = value; }
+        }
+
+        public BuffType BuffType
+        {
+            get { return m_BuffType; }
+            set { m_BuffType = value; }
         }
 
         /// <summary>卡牌的实际功能。伤害、治疗、抽牌等都在这里，不在卡牌数据上。</summary>

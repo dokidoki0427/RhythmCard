@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Id: buff_heavy
   m_DisplayName: "\u91CD\u97F3"
-  m_Description: "\u4E00\u6B21\u6C89\u91CD\u7684\u6253\u51FB\u3002"
+  m_Description: "\u6C89\u91CD\u7684\u6253\u51FB\u3002"
   m_Rarity: 0
   m_NoteType: 0
   m_Pattern: 0
   m_NoteCount: 4
   m_Seed: 0
   m_Icon: {fileID: 0}
-  m_Accent: {r: 0.86, g: 0.32, b: 0.3, a: 1}
+  m_Accent: {r: 0.9, g: 0.35, b: 0.3, a: 1}
+  m_BuffType: 0
   m_Effect: {fileID: 11400000, guid: bd5d80c833e42294089e37ca8cd594ec, type: 2}

@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70fbef45ca109044a8d3cf39931a17fd, type: 3}
-  m_Name: buff_echo
+  m_Name: buff_aegis
   m_EditorClassIdentifier: 
-  m_Id: buff_echo
-  m_DisplayName: "\u56DE\u58F0"
-  m_Description: "\u4F59\u97F3\u7ED5\u6881\u3002"
+  m_Id: buff_aegis
+  m_DisplayName: "\u5B88\u8C03"
+  m_Description: "\u7A33\u56FA\u7684\u62A4\u7532\u3002"
   m_Rarity: 0
   m_NoteType: 0
   m_Pattern: 0
   m_NoteCount: 4
   m_Seed: 0
   m_Icon: {fileID: 0}
-  m_Accent: {r: 0.55, g: 0.55, b: 0.85, a: 1}
-  m_Effect: {fileID: 11400000, guid: 2355bffd8dcc673469972bc5c8509866, type: 2}
+  m_Accent: {r: 0.3, g: 0.8, b: 0.85, a: 1}
+  m_BuffType: 1
+  m_Effect: {fileID: 11400000, guid: 8e563f58c9e0cc945a79a26db04920a4, type: 2}

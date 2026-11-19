@@ -21,5 +21,6 @@ MonoBehaviour:
   m_NoteCount: 4
   m_Seed: 0
   m_Icon: {fileID: 0}
-  m_Accent: {r: 0.35, g: 0.62, b: 1, a: 1}
+  m_Accent: {r: 0.9, g: 0.3, b: 0.45, a: 1}
+  m_BuffType: 0
   m_Effect: {fileID: 11400000, guid: 52f53407be0039243a17dad79c369c1a, type: 2}

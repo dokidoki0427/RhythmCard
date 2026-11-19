@@ -44,6 +44,8 @@ namespace CardRhythm.EditorUI
             // 外部放进来的图（例如美术下载的音符）也要保证是 Sprite 导入。
             EnsureSprite(Folder + "/NoteGlyph.png");
             EnsureSprite(Folder + "/音符.png");
+            EnsureSprite(Folder + "/BuffAttack.png");
+            EnsureSprite(Folder + "/BuffDefense.png");
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

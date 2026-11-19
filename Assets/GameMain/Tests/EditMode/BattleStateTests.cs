@@ -20,13 +20,14 @@ namespace CardRhythm.Tests.EditMode
             return buff;
         }
 
-        private static CardDefinition MakeHealBuff(string id, int heal)
+        private static CardDefinition MakeArmorBuff(string id, int armor)
         {
-            var effect = ScriptableObject.CreateInstance<HealEffect>();
-            effect.Heal = heal;
+            var effect = ScriptableObject.CreateInstance<ArmorEffect>();
+            effect.Armor = armor;
             var buff = ScriptableObject.CreateInstance<CardDefinition>();
             buff.Id = id;
             buff.DisplayName = id;
+            buff.BuffType = BuffType.Defense;
             buff.Effect = effect;
             return buff;
         }
@@ -90,13 +91,32 @@ namespace CardRhythm.Tests.EditMode
         }
 
         [Test]
-        public void Heal_RestoresPlayerHp()
+        public void Armor_AbsorbsEnemyAttackFirst()
         {
-            var state = new BattleState { PlayerHp = 90f };
-            state.RegisterBuff(MakeHealBuff("buff_heal", 8), 1);
-            state.ApplyBuffNote("buff_heal", Judgement.Perfect);
+            var state = new BattleState();
+            state.RegisterBuff(MakeArmorBuff("buff_armor", 15), 1);
+            state.ApplyBuffNote("buff_armor", Judgement.Perfect);
+            Assert.AreEqual(15f, state.PlayerArmor, 0.001f);
 
-            Assert.AreEqual(98f, state.PlayerHp, 0.001f);
+            state.ApplyJudgement(Judgement.Good);
+            state.ApplyJudgement(Judgement.Bad);
+
+            Assert.AreEqual(100f, state.PlayerHp, 0.001f, "护甲先挡伤害");
+            Assert.AreEqual(5f, state.PlayerArmor, 0.001f);
+        }
+
+        [Test]
+        public void Armor_OverflowDamagesHp()
+        {
+            var state = new BattleState();
+            state.RegisterBuff(MakeArmorBuff("buff_armor2", 5), 1);
+            state.ApplyBuffNote("buff_armor2", Judgement.Perfect);
+
+            state.ApplyJudgement(Judgement.Good);
+            state.ApplyJudgement(Judgement.Bad);
+
+            Assert.AreEqual(0f, state.PlayerArmor, 0.001f);
+            Assert.AreEqual(95f, state.PlayerHp, 0.001f);
         }
 
         [Test]

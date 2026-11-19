@@ -10,16 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70fbef45ca109044a8d3cf39931a17fd, type: 3}
-  m_Name: buff_rest
+  m_Name: buff_bastion
   m_EditorClassIdentifier: 
-  m_Id: buff_rest
-  m_DisplayName: "\u4F11\u6B62"
-  m_Description: "\u77ED\u6682\u7684\u547C\u5438\u3002"
+  m_Id: buff_bastion
+  m_DisplayName: "\u58C1\u5792"
+  m_Description: "\u539A\u5B9E\u7684\u62A4\u7532\u3002"
   m_Rarity: 0
   m_NoteType: 0
   m_Pattern: 0
   m_NoteCount: 4
   m_Seed: 0
   m_Icon: {fileID: 0}
-  m_Accent: {r: 0.4, g: 0.78, b: 0.55, a: 1}
-  m_Effect: {fileID: 11400000, guid: 9d256c1e9b539b8438a60547de1f1d83, type: 2}
+  m_Accent: {r: 0.55, g: 0.55, b: 0.95, a: 1}
+  m_BuffType: 1
+  m_Effect: {fileID: 11400000, guid: 361b4dd94e0a9784e81f89399d682a91, type: 2}

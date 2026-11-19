@@ -147,7 +147,6 @@ namespace CardRhythm.Rhythm
                 m_LaneFlashes[lane] = flashImage;
             }
 
-            var taggedBuffs = new HashSet<string>();
             for (int i = 0; i < chart.Notes.Count; i++)
             {
                 NoteData note = chart.Notes[i];
@@ -169,9 +168,9 @@ namespace CardRhythm.Rhythm
                 image.raycastTarget = false;
                 m_NoteViews.Add(image);
 
-                if (!string.IsNullOrEmpty(note.BuffId) && taggedBuffs.Add(note.BuffId))
+                if (!string.IsNullOrEmpty(note.BuffId))
                 {
-                    AddBuffTag(noteRect, note.BuffId);
+                    ApplyBuffIcon(noteRect, image, note.BuffId);
                 }
             }
 
@@ -181,6 +180,28 @@ namespace CardRhythm.Rhythm
             {
                 m_Judger.JudgedEvent += OnJudged;
             }
+        }
+
+        /// <summary>Buff 音符直接显示类型图标（攻击 / 防御），整组音符都是同一个图标。</summary>
+        private void ApplyBuffIcon(RectTransform noteRect, Image image, string buffId)
+        {
+            BuffProgress progress = FindProgress(buffId);
+            if (progress == null || progress.Definition == null)
+            {
+                return;
+            }
+
+            string iconName = progress.Definition.BuffType == BuffType.Defense ? "BuffDefense" : "BuffAttack";
+            var sprite = Resources.Load<Sprite>("Pic/" + iconName);
+            if (sprite == null)
+            {
+                return;
+            }
+
+            noteRect.sizeDelta = new Vector2(54f, 54f);
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.color = progress.Color;
         }
 
         /// <summary>在 Buff 组第一个音符上方挂一个标签：名字 + 效果。</summary>
@@ -235,10 +256,10 @@ namespace CardRhythm.Rhythm
                 return "伤害 " + damage.Damage;
             }
 
-            var heal = progress.Definition.Effect as HealEffect;
-            if (heal != null)
+            var armor = progress.Definition.Effect as ArmorEffect;
+            if (armor != null)
             {
-                return "回复 " + heal.Heal;
+                return "护甲 " + armor.Armor;
             }
 
             return string.Empty;
@@ -528,7 +549,8 @@ namespace CardRhythm.Rhythm
 
             float player = Mathf.Clamp01(m_State.PlayerHp / BattleState.DefaultPlayerHp);
             m_PlayerHpFill.rectTransform.sizeDelta = new Vector2(312f * player, 18f);
-            m_PlayerHpText.text = "HP " + m_State.DisplayPlayerHp;
+            m_PlayerHpText.text = "HP " + m_State.DisplayPlayerHp
+                + (m_State.PlayerArmor > 0f ? "   ARMOR " + m_State.DisplayPlayerArmor : string.Empty);
 
             float enemy = Mathf.Clamp01(m_State.EnemyHp / Mathf.Max(1f, m_State.MaxEnemyHp));
             m_EnemyHpFill.rectTransform.sizeDelta = new Vector2(312f * enemy, 18f);
@@ -604,8 +626,11 @@ namespace CardRhythm.Rhythm
                 return;
             }
 
-            m_NextBuffText.text = "下一个  " + nextProgress.DisplayName + "    " + EffectLabel(nextProgress)
-                + "    " + nextProgress.Judged + "/" + nextProgress.Required;
+            string typeName = nextProgress.Definition != null && nextProgress.Definition.BuffType == BuffType.Defense
+                ? "防御"
+                : "攻击";
+            m_NextBuffText.text = "下一个  " + typeName + " · " + nextProgress.DisplayName + "    "
+                + EffectLabel(nextProgress) + "    " + nextProgress.Judged + "/" + nextProgress.Required;
         }
 
         private void OnJudged(NoteData note, Judgement judgement)

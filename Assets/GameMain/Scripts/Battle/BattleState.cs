@@ -51,6 +51,7 @@ namespace CardRhythm.Battle
         public const float DefaultPlayerHp = 100f;
 
         public float PlayerHp = DefaultPlayerHp;
+        public float PlayerArmor;
         public float EnemyHp;
         public float ShieldHp;
         public readonly float MaxEnemyHp;
@@ -199,7 +200,7 @@ namespace CardRhythm.Battle
             string summary;
 
             var damage = progress.Definition.Effect as DamageEffect;
-            var heal = progress.Definition.Effect as HealEffect;
+            var armor = progress.Definition.Effect as ArmorEffect;
 
             if (damage != null)
             {
@@ -207,11 +208,11 @@ namespace CardRhythm.Battle
                 ApplyDamage(amount);
                 summary = "造成 " + amount + " 伤害";
             }
-            else if (heal != null)
+            else if (armor != null)
             {
-                int amount = Mathf.RoundToInt(heal.Heal * activation);
-                PlayerHp = Mathf.Min(DefaultPlayerHp, PlayerHp + amount);
-                summary = "回复 " + amount + " 生命";
+                int amount = Mathf.RoundToInt(armor.Armor * activation);
+                ApplyArmor(amount);
+                summary = "获得 " + amount + " 护甲";
             }
             else
             {
@@ -264,7 +265,7 @@ namespace CardRhythm.Battle
                 if (m_NonPerfect >= NonPerfectPerAttack)
                 {
                     m_NonPerfect = 0;
-                    PlayerHp -= EnemyAttack;
+                    DamagePlayer(EnemyAttack);
                 }
             }
         }
@@ -305,7 +306,44 @@ namespace CardRhythm.Battle
             }
 
             m_LastPeriodicBar = bar;
-            PlayerHp -= PeriodicDamage;
+            DamagePlayer(PeriodicDamage);
+        }
+
+        /// <summary>获得护甲；护甲先于生命被敌人攻击消耗。</summary>
+        public void ApplyArmor(float amount)
+        {
+            if (amount > 0f)
+            {
+                PlayerArmor += amount;
+            }
+        }
+
+        /// <summary>敌人对玩家造成伤害：先扣护甲，溢出才扣血。</summary>
+        public void DamagePlayer(float amount)
+        {
+            if (amount <= 0f)
+            {
+                return;
+            }
+
+            if (PlayerArmor > 0f)
+            {
+                PlayerArmor -= amount;
+                if (PlayerArmor < 0f)
+                {
+                    PlayerHp += PlayerArmor;
+                    PlayerArmor = 0f;
+                }
+            }
+            else
+            {
+                PlayerHp -= amount;
+            }
+        }
+
+        public int DisplayPlayerArmor
+        {
+            get { return Mathf.CeilToInt(Mathf.Max(0f, PlayerArmor)); }
         }
 
         public int DisplayPlayerHp

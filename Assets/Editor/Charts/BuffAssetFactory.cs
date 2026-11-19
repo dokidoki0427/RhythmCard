@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
 using CardRhythm.Cards;
 using UnityEditor;
 using UnityEngine;
 
 namespace CardRhythm.EditorCharts
 {
-    /// <summary>生成一套测试 Buff（复用 CardDefinition 数据结构，运行时按 Buff 使用）。</summary>
+    /// <summary>生成测试 Buff：3 个攻击（伤害）+ 3 个防御（护甲）。</summary>
     public static class BuffAssetFactory
     {
         private const string BuffFolder = "Assets/GameMain/Resources/Buffs";
@@ -27,41 +26,53 @@ namespace CardRhythm.EditorCharts
         public static void GenerateAll()
         {
             EnsureFolder();
-            CreateBuff("buff_heavy", "重音", "一次沉重的打击。", new Color(0.86f, 0.32f, 0.30f), 40);
-            CreateBuff("buff_chord", "和弦", "三个音同时落下。", new Color(0.92f, 0.55f, 0.20f), 60);
-            CreateBuff("buff_light", "跳音", "轻快但频繁。", new Color(0.35f, 0.62f, 1f), 25);
-            CreateBuff("buff_rest", "休止", "短暂的呼吸。", new Color(0.40f, 0.78f, 0.55f), 25, true);
-            CreateBuff("buff_echo", "回声", "余音绕梁。", new Color(0.55f, 0.55f, 0.85f), 40, true);
-            CreateBuff("buff_fermata", "延长", "一个长长的尾音。", new Color(0.80f, 0.70f, 0.95f), 55, true);
+
+            CreateBuff("buff_heavy", "重音", "沉重的打击。", new Color(0.90f, 0.35f, 0.30f), 40, BuffType.Attack, 40);
+            CreateBuff("buff_chord", "和弦", "三个音同时落下。", new Color(0.95f, 0.55f, 0.20f), 60, BuffType.Attack, 60);
+            CreateBuff("buff_light", "跳音", "轻快但频繁。", new Color(0.90f, 0.30f, 0.45f), 25, BuffType.Attack, 25);
+
+            CreateBuff("buff_guard", "护音", "一小段护甲。", new Color(0.35f, 0.65f, 0.95f), 30, BuffType.Defense, 30);
+            CreateBuff("buff_aegis", "守调", "稳固的护甲。", new Color(0.30f, 0.80f, 0.85f), 45, BuffType.Defense, 45);
+            CreateBuff("buff_bastion", "壁垒", "厚实的护甲。", new Color(0.55f, 0.55f, 0.95f), 60, BuffType.Defense, 60);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[BUFF] generated");
         }
 
-        private static void CreateBuff(string id, string name, string description, Color color, int power, bool heal = false)
+        private static void CreateBuff(string id, string name, string description, Color color, int power, BuffType type, int armor)
         {
             string effectPath = EffectFolder + "/" + id + "_effect.asset";
             CardEffect effect = AssetDatabase.LoadAssetAtPath<CardEffect>(effectPath);
 
-            if (heal)
+            if (type == BuffType.Defense)
             {
-                var healEffect = effect as HealEffect;
-                if (healEffect == null)
+                var armorEffect = effect as ArmorEffect;
+                if (armorEffect == null)
                 {
-                    healEffect = ScriptableObject.CreateInstance<HealEffect>();
-                    AssetDatabase.CreateAsset(healEffect, effectPath);
+                    if (effect != null)
+                    {
+                        AssetDatabase.DeleteAsset(effectPath);
+                    }
+
+                    armorEffect = ScriptableObject.CreateInstance<ArmorEffect>();
+                    AssetDatabase.CreateAsset(armorEffect, effectPath);
                 }
 
-                healEffect.Heal = power;
-                EditorUtility.SetDirty(healEffect);
-                effect = healEffect;
+                armorEffect.Armor = armor;
+                EditorUtility.SetDirty(armorEffect);
+                effect = armorEffect;
             }
             else
             {
                 var damageEffect = effect as DamageEffect;
                 if (damageEffect == null)
                 {
+                    if (effect != null)
+                    {
+                        AssetDatabase.DeleteAsset(effectPath);
+                    }
+
                     damageEffect = ScriptableObject.CreateInstance<DamageEffect>();
                     AssetDatabase.CreateAsset(damageEffect, effectPath);
                 }
@@ -84,6 +95,7 @@ namespace CardRhythm.EditorCharts
             buff.Description = description;
             buff.NoteCount = 4;
             buff.Accent = color;
+            buff.BuffType = type;
             buff.Effect = effect;
             EditorUtility.SetDirty(buff);
         }
