@@ -313,3 +313,18 @@ Assets/GameMain/Resources/Buffs/
 测试：`verify` PASS，EditMode 51/51。
 
 试玩：直接 Play → 开始游戏。首次运行没有 Buff 存档，会自动发放 3 个基础 Buff；设置里可调“每 N 场给一次选择”。
+
+---
+
+## 14. 难度与下落速度（2026-11-19）
+
+原则：**BPM 只来自音乐，不用 BPM 做难度。**
+
+- 谱面仍是一张一个 BPM，与歌曲对齐；难度通过密度、长按比例、Buff 槽位、敌人数值体现。
+- 难度枚举 `Difficulty { Normal, Hard }` 放在 `ChartDefinition`。
+- 命名：`Resources/Charts/chart_{敌人Id}_{normal|hard}`；加载顺序 hard/normal → `_normal` → 无后缀（兼容旧谱）。
+- 敌人数值：困难 ×1.2（HP / 攻击 / 护盾）。
+- 测试谱：普通 8 个槽位 + 每小节 2 音符；困难 6 个槽位 + 每小节 3 音符、长按更多。
+- 下落速度独立为玩家设置 `GameSettings.ScrollSpeed`（0.5–2.0），不再随难度变化；`NoteStageView` 用 `SecondsPerBeat × TravelBeats ÷ ScrollSpeed` 计算下落时间。
+- 设置界面新增：难度切换、下落速度 ±。
+- 谱面编辑器新增难度字段；生成器一次生成普通/困难两套。
