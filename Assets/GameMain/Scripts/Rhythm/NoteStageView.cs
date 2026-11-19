@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using CardRhythm.Battle;
+using CardRhythm.Cards;
 using CardRhythm.Settings;
+using CardRhythm.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -61,6 +63,7 @@ namespace CardRhythm.Rhythm
         private Text m_ComboText;
         private Text m_ScoreText;
         private Text m_BuffText;
+        private Text m_NextBuffText;
         private Transform m_CanvasRoot;
         private float m_TravelSeconds = 1f;
 
@@ -144,6 +147,7 @@ namespace CardRhythm.Rhythm
                 m_LaneFlashes[lane] = flashImage;
             }
 
+            var taggedBuffs = new HashSet<string>();
             for (int i = 0; i < chart.Notes.Count; i++)
             {
                 NoteData note = chart.Notes[i];
@@ -164,6 +168,11 @@ namespace CardRhythm.Rhythm
                 image.color = color;
                 image.raycastTarget = false;
                 m_NoteViews.Add(image);
+
+                if (!string.IsNullOrEmpty(note.BuffId) && taggedBuffs.Add(note.BuffId))
+                {
+                    AddBuffTag(noteRect, note.BuffId);
+                }
             }
 
             BuildPopupPool();
@@ -172,6 +181,67 @@ namespace CardRhythm.Rhythm
             {
                 m_Judger.JudgedEvent += OnJudged;
             }
+        }
+
+        /// <summary>在 Buff 组第一个音符上方挂一个标签：名字 + 效果。</summary>
+        private void AddBuffTag(RectTransform noteRect, string buffId)
+        {
+            BuffProgress progress = FindProgress(buffId);
+            string label = progress != null ? progress.DisplayName + "  " + EffectLabel(progress) : buffId;
+
+            var tag = CreateRect(noteRect, "BuffTag");
+            tag.anchorMin = new Vector2(0.5f, 0.5f);
+            tag.anchorMax = new Vector2(0.5f, 0.5f);
+            tag.sizeDelta = new Vector2(NoteWidth + 120f, 28f);
+            tag.anchoredPosition = new Vector2(0f, 30f);
+
+            var text = tag.gameObject.AddComponent<Text>();
+            text.font = SheetTheme.MainFont;
+            text.fontSize = 22;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = progress != null ? progress.Color : Color.white;
+            text.text = label;
+            text.raycastTarget = false;
+        }
+
+        private BuffProgress FindProgress(string buffId)
+        {
+            if (m_State == null || string.IsNullOrEmpty(buffId))
+            {
+                return null;
+            }
+
+            foreach (BuffProgress progress in m_State.Buffs)
+            {
+                if (progress.Id == buffId)
+                {
+                    return progress;
+                }
+            }
+
+            return null;
+        }
+
+        private static string EffectLabel(BuffProgress progress)
+        {
+            if (progress == null || progress.Definition == null || progress.Definition.Effect == null)
+            {
+                return string.Empty;
+            }
+
+            var damage = progress.Definition.Effect as DamageEffect;
+            if (damage != null)
+            {
+                return "伤害 " + damage.Damage;
+            }
+
+            var heal = progress.Definition.Effect as HealEffect;
+            if (heal != null)
+            {
+                return "回复 " + heal.Heal;
+            }
+
+            return string.Empty;
         }
 
         private void OnDestroy()
@@ -394,6 +464,12 @@ namespace CardRhythm.Rhythm
             m_BuffText.rectTransform.sizeDelta = new Vector2(900f, 30f);
             m_BuffText.rectTransform.anchoredPosition = new Vector2(0f, -132f);
 
+            m_NextBuffText = CreateText(canvasRoot, string.Empty, 26, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.92f));
+            m_NextBuffText.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+            m_NextBuffText.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            m_NextBuffText.rectTransform.sizeDelta = new Vector2(1100f, 34f);
+            m_NextBuffText.rectTransform.anchoredPosition = new Vector2(0f, -170f);
+
             Text layerText = CreateText(canvasRoot, "LAYER " + RunState.Layer + " / " + RunState.MaxLayer, 24,
                 TextAnchor.MiddleLeft, new Color(1f, 1f, 1f, 0.7f));
             layerText.rectTransform.anchorMin = new Vector2(0f, 1f);
@@ -477,6 +553,59 @@ namespace CardRhythm.Rhythm
 
                 m_BuffText.text = builder.ToString();
             }
+
+            UpdateNextBuff();
+        }
+
+        /// <summary>顶部提示“下一个要结算的 Buff”，跟着谱面走。</summary>
+        private void UpdateNextBuff()
+        {
+            if (m_NextBuffText == null || m_Chart == null || m_Conductor == null)
+            {
+                return;
+            }
+
+            float now = m_Conductor.SongTime;
+            NoteData? next = null;
+            for (int i = 0; i < m_Chart.Notes.Count; i++)
+            {
+                NoteData note = m_Chart.Notes[i];
+                if (string.IsNullOrEmpty(note.BuffId))
+                {
+                    continue;
+                }
+
+                BuffProgress progress = FindProgress(note.BuffId);
+                if (progress == null || progress.Complete)
+                {
+                    continue;
+                }
+
+                if (note.Time < now - 0.2f)
+                {
+                    continue;
+                }
+
+                if (next == null || note.Time < next.Value.Time)
+                {
+                    next = note;
+                }
+            }
+
+            if (next == null)
+            {
+                m_NextBuffText.text = "下一个 Buff：—";
+                return;
+            }
+
+            BuffProgress nextProgress = FindProgress(next.Value.BuffId);
+            if (nextProgress == null)
+            {
+                return;
+            }
+
+            m_NextBuffText.text = "下一个  " + nextProgress.DisplayName + "    " + EffectLabel(nextProgress)
+                + "    " + nextProgress.Judged + "/" + nextProgress.Required;
         }
 
         private void OnJudged(NoteData note, Judgement judgement)
