@@ -1,0 +1,290 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1125eb11daabdd4697d4fd127533d0a, type: 3}
+  m_Name: chart_boss_hard
+  m_EditorClassIdentifier: 
+  m_Id: chart_boss_hard
+  m_EnemyId: boss
+  m_Difficulty: 1
+  m_Bpm: 120
+  m_Bars: 16
+  m_Notes:
+  - Bar: 0
+    Slot: 0
+    Lane: 2
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 0
+    Slot: 4
+    Lane: 0
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 0
+    Slot: 6
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 1
+    Slot: 0
+    Lane: 1
+    SlotId: S1
+    LengthSlots: 0
+  - Bar: 1
+    Slot: 2
+    Lane: 3
+    SlotId: S1
+    LengthSlots: 0
+  - Bar: 1
+    Slot: 4
+    Lane: 0
+    SlotId: S1
+    LengthSlots: 0
+  - Bar: 1
+    Slot: 6
+    Lane: 2
+    SlotId: S1
+    LengthSlots: 0
+  - Bar: 2
+    Slot: 0
+    Lane: 0
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 2
+    Slot: 4
+    Lane: 2
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 2
+    Slot: 6
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 3
+    Slot: 0
+    Lane: 3
+    SlotId: S2
+    LengthSlots: 0
+  - Bar: 3
+    Slot: 2
+    Lane: 0
+    SlotId: S2
+    LengthSlots: 0
+  - Bar: 3
+    Slot: 4
+    Lane: 2
+    SlotId: S2
+    LengthSlots: 0
+  - Bar: 3
+    Slot: 6
+    Lane: 1
+    SlotId: S2
+    LengthSlots: 0
+  - Bar: 4
+    Slot: 0
+    Lane: 2
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 4
+    Slot: 4
+    Lane: 0
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 4
+    Slot: 6
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 0
+    Lane: 0
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 2
+    Lane: 2
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 4
+    Lane: 1
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 6
+    Lane: 3
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 6
+    Slot: 0
+    Lane: 0
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 6
+    Slot: 4
+    Lane: 2
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 6
+    Slot: 6
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 0
+    Lane: 2
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 2
+    Lane: 1
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 4
+    Lane: 3
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 6
+    Lane: 0
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 8
+    Slot: 0
+    Lane: 2
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 8
+    Slot: 4
+    Lane: 0
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 8
+    Slot: 6
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 0
+    Lane: 1
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 2
+    Lane: 3
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 4
+    Lane: 0
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 6
+    Lane: 2
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 10
+    Slot: 0
+    Lane: 0
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 10
+    Slot: 4
+    Lane: 2
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 10
+    Slot: 6
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 0
+    Lane: 3
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 2
+    Lane: 0
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 4
+    Lane: 2
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 6
+    Lane: 1
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 12
+    Slot: 0
+    Lane: 2
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 12
+    Slot: 4
+    Lane: 0
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 12
+    Slot: 6
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 0
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 4
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 6
+    Lane: 0
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 14
+    Slot: 0
+    Lane: 0
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 14
+    Slot: 4
+    Lane: 2
+    SlotId: 
+    LengthSlots: 6
+  - Bar: 14
+    Slot: 6
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 0
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 4
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 6
+    Lane: 2
+    SlotId: 
+    LengthSlots: 0

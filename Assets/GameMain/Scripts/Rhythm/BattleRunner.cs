@@ -46,7 +46,12 @@ namespace CardRhythm.Rhythm
         {
             var enemy = LoadEnemy();
             m_EnemyName = enemy != null ? enemy.DisplayName : "未知敌人";
-            m_State = new BattleState(enemy);
+
+            float scale = GameSettings.Difficulty == Difficulty.Hard ? 1.2f : 1f;
+            m_State = enemy != null
+                ? new BattleState(enemy.MaxHp * scale, enemy.Attack * scale, enemy.NonPerfectPerAttack,
+                    enemy.Behavior, enemy.ShieldHp * scale, enemy.PeriodicBars, enemy.PeriodicDamage)
+                : new BattleState();
 
             ChartDefinition definition = LoadChart(enemy);
             m_Bpm = definition != null ? definition.Bpm : bpm;
@@ -302,10 +307,22 @@ namespace CardRhythm.Rhythm
         private static ChartDefinition LoadChart(EnemyDefinition enemy)
         {
             string id = enemy != null && !string.IsNullOrEmpty(enemy.Id) ? enemy.Id : RunState.CurrentEnemyId;
-            var definition = Resources.Load<ChartDefinition>("Charts/chart_" + id);
+            string suffix = GameSettings.Difficulty == Difficulty.Hard ? "hard" : "normal";
+
+            var definition = Resources.Load<ChartDefinition>("Charts/chart_" + id + "_" + suffix);
             if (definition == null)
             {
-                Debug.LogWarning("[BATTLE] 找不到谱面 Resources/Charts/chart_" + id);
+                definition = Resources.Load<ChartDefinition>("Charts/chart_" + id + "_normal");
+            }
+
+            if (definition == null)
+            {
+                definition = Resources.Load<ChartDefinition>("Charts/chart_" + id);
+            }
+
+            if (definition == null)
+            {
+                Debug.LogWarning("[BATTLE] 找不到谱面 Resources/Charts/chart_" + id + "_" + suffix);
             }
 
             return definition;

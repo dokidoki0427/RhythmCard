@@ -80,7 +80,7 @@ namespace CardRhythm.Rhythm
             m_Judger = judger;
             m_State = state;
             m_EnemyName = enemyName;
-            m_TravelSeconds = conductor.SecondsPerBeat * TravelBeats;
+            m_TravelSeconds = conductor.SecondsPerBeat * TravelBeats / Mathf.Max(0.25f, GameSettings.ScrollSpeed);
 
             var canvasObject = new GameObject("NoteStage", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(transform, false);

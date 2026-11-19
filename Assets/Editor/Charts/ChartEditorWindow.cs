@@ -115,6 +115,7 @@ namespace CardRhythm.EditorCharts
             m_Chart.Id = EditorGUILayout.TextField("Id", m_Chart.Id);
             m_Chart.EnemyId = EditorGUILayout.TextField("敌人 Id", m_Chart.EnemyId);
             m_Chart.Bpm = EditorGUILayout.FloatField("BPM", m_Chart.Bpm);
+            m_Chart.Difficulty = (Difficulty)EditorGUILayout.EnumPopup("难度", m_Chart.Difficulty);
             m_Chart.Bars = EditorGUILayout.IntSlider("小节数", m_Chart.Bars, 4, 64);
             EditorGUILayout.LabelField("提示：点亮格子放音符；槽位模式下放置的音符会归到当前槽位。");
         }

@@ -31,7 +31,8 @@ namespace CardRhythm.EditorCharts
             EnsureFolder();
             foreach (string enemy in Enemies)
             {
-                CreateOrUpdate(enemy);
+                CreateOrUpdate(enemy, Difficulty.Normal);
+                CreateOrUpdate(enemy, Difficulty.Hard);
             }
 
             AssetDatabase.SaveAssets();
@@ -39,9 +40,10 @@ namespace CardRhythm.EditorCharts
             Debug.Log("[CHART] generated");
         }
 
-        private static void CreateOrUpdate(string enemyId)
+        private static void CreateOrUpdate(string enemyId, Difficulty difficulty)
         {
-            string path = Folder + "/chart_" + enemyId + ".asset";
+            string suffix = difficulty == Difficulty.Hard ? "hard" : "normal";
+            string path = Folder + "/chart_" + enemyId + "_" + suffix + ".asset";
             var chart = AssetDatabase.LoadAssetAtPath<ChartDefinition>(path);
             if (chart == null)
             {
@@ -49,22 +51,26 @@ namespace CardRhythm.EditorCharts
                 AssetDatabase.CreateAsset(chart, path);
             }
 
-            chart.Id = "chart_" + enemyId;
+            bool hard = difficulty == Difficulty.Hard;
+            chart.Id = "chart_" + enemyId + "_" + suffix;
             chart.EnemyId = enemyId;
+            chart.Difficulty = difficulty;
             chart.Bpm = 120f;
             chart.Bars = 16;
 
             var notes = new List<ChartNote>();
-            int seed = enemyId.GetHashCode();
+            int seed = enemyId.GetHashCode() + (hard ? 17 : 0);
 
-            // 八个 Buff 槽位：奇数小节各 4 个音符，一个槽位正好对应一个 Buff。
-            var slotBars = new[] { 1, 3, 5, 7, 9, 11, 13, 15 };
+            // 普通 8 个槽位，困难 6 个：困难输出窗口更少，整体更吃紧。
+            int[] slotBars = hard
+                ? new[] { 1, 3, 5, 7, 9, 11 }
+                : new[] { 1, 3, 5, 7, 9, 11, 13, 15 };
             for (int i = 0; i < slotBars.Length; i++)
             {
                 AddSlot(notes, slotBars[i], "S" + (i + 1), seed + i);
             }
 
-            // 普通填充音符：每小节 2 个，避开槽位小节。
+            // 填充音符：普通每小节 2 个，困难 3 个并更频繁地出现长按。
             for (int bar = 0; bar < chart.Bars; bar++)
             {
                 if (System.Array.IndexOf(slotBars, bar) >= 0)
@@ -72,14 +78,20 @@ namespace CardRhythm.EditorCharts
                     continue;
                 }
 
+                int holdEvery = hard ? 2 : 4;
                 notes.Add(new ChartNote { Bar = bar, Slot = 0, Lane = (bar + seed) & 3 });
                 notes.Add(new ChartNote
                 {
                     Bar = bar,
                     Slot = 4,
                     Lane = (bar + seed + 2) & 3,
-                    LengthSlots = bar % 4 == 0 ? 4 : 0,
+                    LengthSlots = bar % holdEvery == 0 ? (hard ? 6 : 4) : 0,
                 });
+
+                if (hard)
+                {
+                    notes.Add(new ChartNote { Bar = bar, Slot = 6, Lane = (bar + seed + 1) & 3 });
+                }
             }
 
             notes.Sort((a, b) => (a.Bar * 8 + a.Slot).CompareTo(b.Bar * 8 + b.Slot));

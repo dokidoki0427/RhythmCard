@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using CardRhythm.UI;
 using UnityEditor;
@@ -191,7 +191,9 @@ namespace CardRhythm.EditorUI
 
             Vector2 panelSize = def.Id == UIFormId.Deck || def.Id == UIFormId.Reward
                 ? new Vector2(1240f, 820f)
-                : def.Id == UIFormId.Pause ? new Vector2(720f, 560f) : new Vector2(920f, 620f);
+                : def.Id == UIFormId.Pause ? new Vector2(720f, 560f)
+                : def.Id == UIFormId.Settings ? new Vector2(920f, 800f)
+                : new Vector2(920f, 620f);
 
             var root = CreateRoot(def, def.Id + "Form", new Color(0f, 0f, 0f, 0f));
 

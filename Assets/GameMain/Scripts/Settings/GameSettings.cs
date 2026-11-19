@@ -12,7 +12,37 @@ namespace CardRhythm.Settings
         public const string OffsetKey = "rhythm.offsetMs";
         public const string DeckKey = "rhythm.deckIds";
         public const string RewardEveryKey = "rhythm.rewardEvery";
+        public const string DifficultyKey = "rhythm.difficulty";
+        public const string ScrollSpeedKey = "rhythm.scrollSpeed";
         public const int MaxBuffs = 3;
+
+        /// <summary>当前难度（普通 / 困难）。</summary>
+        public static CardRhythm.Charts.Difficulty Difficulty
+        {
+            get
+            {
+                int value = PlayerPrefs.GetInt(DifficultyKey, (int)CardRhythm.Charts.Difficulty.Normal);
+                return value == (int)CardRhythm.Charts.Difficulty.Hard
+                    ? CardRhythm.Charts.Difficulty.Hard
+                    : CardRhythm.Charts.Difficulty.Normal;
+            }
+            set
+            {
+                PlayerPrefs.SetInt(DifficultyKey, (int)value);
+                PlayerPrefs.Save();
+            }
+        }
+
+        /// <summary>下落速度倍率（0.5~2.0），与难度解耦，只影响手感。</summary>
+        public static float ScrollSpeed
+        {
+            get { return Mathf.Clamp(PlayerPrefs.GetFloat(ScrollSpeedKey, 1f), 0.5f, 2f); }
+            set
+            {
+                PlayerPrefs.SetFloat(ScrollSpeedKey, Mathf.Clamp(value, 0.5f, 2f));
+                PlayerPrefs.Save();
+            }
+        }
 
         /// <summary>每 N 场战斗给一次 Buff 三选一（测试期默认 1，可在设置里调）。</summary>
         public static int RewardEveryBattles

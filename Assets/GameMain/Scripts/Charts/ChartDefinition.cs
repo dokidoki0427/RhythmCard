@@ -17,6 +17,13 @@ namespace CardRhythm.Charts
         public int LengthSlots;
     }
 
+    /// <summary>难度：谱面分别制作，不做自动加密。</summary>
+    public enum Difficulty
+    {
+        Normal = 0,
+        Hard = 1,
+    }
+
     /// <summary>
     /// 固定谱面。敌人绑定一张或多张；运行时由 BattleRunner 转成 <see cref="Chart"/>。
     /// 槽位（SlotId 相同的连续音符）会在开战时填入玩家持有的 Buff。
@@ -26,6 +33,7 @@ namespace CardRhythm.Charts
     {
         [SerializeField] private string m_Id = "chart_new";
         [SerializeField] private string m_EnemyId = "attacker";
+        [SerializeField] private Difficulty m_Difficulty = Difficulty.Normal;
         [SerializeField] private float m_Bpm = 120f;
         [SerializeField] private int m_Bars = 16;
         [SerializeField] private List<ChartNote> m_Notes = new List<ChartNote>();
@@ -40,6 +48,12 @@ namespace CardRhythm.Charts
         {
             get { return m_EnemyId; }
             set { m_EnemyId = value; }
+        }
+
+        public Difficulty Difficulty
+        {
+            get { return m_Difficulty; }
+            set { m_Difficulty = value; }
         }
 
         public float Bpm

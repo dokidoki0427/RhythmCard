@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using CardRhythm.Charts;
 using CardRhythm.Rhythm;
 using CardRhythm.Settings;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace CardRhythm.UI
         private Text m_OffsetLabel;
         private Text m_StatusLabel;
         private Text m_RewardLabel;
+        private Text m_DifficultyLabel;
+        private Text m_ScrollLabel;
         private readonly Text[] m_KeyLabels = new Text[4];
         private int m_RebindingLane = -1;
         private AudioSource m_Audio;
@@ -39,6 +42,8 @@ namespace CardRhythm.UI
             RefreshOffset();
             RefreshKeys();
             RefreshReward();
+            RefreshDifficulty();
+            RefreshScroll();
             SetStatus("按 Esc 关闭");
         }
 
@@ -134,46 +139,88 @@ namespace CardRhythm.UI
             }
 
             UIWidgets.Label(panel, "设 置", 44, TextAnchor.MiddleCenter, SheetTheme.Ink,
-                new Vector2(800f, 60f), new Vector2(0f, 250f));
+                new Vector2(800f, 60f), new Vector2(0f, 330f));
+
+            m_DifficultyLabel = UIWidgets.Label(panel, string.Empty, 26, TextAnchor.MiddleCenter,
+                SheetTheme.Ink, new Vector2(420f, 44f), new Vector2(-140f, 270f));
+            UIWidgets.Button(panel, "切换", new Vector2(140f, 44f), new Vector2(200f, 270f), ToggleDifficulty,
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 22);
 
             m_OffsetLabel = UIWidgets.Label(panel, "OFFSET 0 ms", 32, TextAnchor.MiddleCenter,
-                SheetTheme.Crimson, new Vector2(800f, 50f), new Vector2(0f, 170f));
+                SheetTheme.Crimson, new Vector2(800f, 50f), new Vector2(0f, 210f));
 
-            UIWidgets.Button(panel, "-50", new Vector2(120f, 60f), new Vector2(-270f, 110f), () => AdjustOffset(-50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "-10", new Vector2(120f, 60f), new Vector2(-135f, 110f), () => AdjustOffset(-10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "+10", new Vector2(120f, 60f), new Vector2(0f, 110f), () => AdjustOffset(10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "+50", new Vector2(120f, 60f), new Vector2(135f, 110f), () => AdjustOffset(50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "0", new Vector2(120f, 60f), new Vector2(270f, 110f), () => SetOffset(0), SheetTheme.Crimson, SheetTheme.Parchment, 24);
+            UIWidgets.Button(panel, "-50", new Vector2(120f, 60f), new Vector2(-270f, 160f), () => AdjustOffset(-50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "-10", new Vector2(120f, 60f), new Vector2(-135f, 160f), () => AdjustOffset(-10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+10", new Vector2(120f, 60f), new Vector2(0f, 160f), () => AdjustOffset(10), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+50", new Vector2(120f, 60f), new Vector2(135f, 160f), () => AdjustOffset(50), SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "0", new Vector2(120f, 60f), new Vector2(270f, 160f), () => SetOffset(0), SheetTheme.Crimson, SheetTheme.Parchment, 24);
 
             UIWidgets.Label(panel, "键 位", 26, TextAnchor.MiddleCenter, SheetTheme.InkSoft,
-                new Vector2(200f, 40f), new Vector2(0f, 55f));
+                new Vector2(200f, 40f), new Vector2(0f, 105f));
             for (int lane = 0; lane < 4; lane++)
             {
                 int captured = lane;
                 float x = (lane - 1.5f) * 170f;
-                UIWidgets.Button(panel, "轨 " + lane, new Vector2(150f, 58f), new Vector2(x, 5f), () => BeginRebind(captured),
+                UIWidgets.Button(panel, "轨 " + lane, new Vector2(150f, 58f), new Vector2(x, 60f), () => BeginRebind(captured),
                     SheetTheme.ParchmentDark, SheetTheme.Ink, 22);
                 m_KeyLabels[lane] = UIWidgets.Label(panel, "-", 24, TextAnchor.MiddleCenter, SheetTheme.Ink,
-                    new Vector2(150f, 30f), new Vector2(x, -32f));
+                    new Vector2(150f, 30f), new Vector2(x, 25f));
             }
 
-            UIWidgets.Button(panel, "试听节拍", new Vector2(220f, 60f), new Vector2(-130f, -85f), PlayMetronome,
+            UIWidgets.Button(panel, "试听节拍", new Vector2(220f, 60f), new Vector2(-130f, -30f), PlayMetronome,
                 SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "自动校准 (敲 8 次)", new Vector2(300f, 60f), new Vector2(150f, -85f), BeginCalibration,
+            UIWidgets.Button(panel, "自动校准 (敲 8 次)", new Vector2(300f, 60f), new Vector2(150f, -30f), BeginCalibration,
                 SheetTheme.Gold, SheetTheme.Ink, 24);
 
+            m_ScrollLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
+                SheetTheme.Ink, new Vector2(420f, 40f), new Vector2(0f, -90f));
+            UIWidgets.Button(panel, "-", new Vector2(56f, 44f), new Vector2(-230f, -90f), () => AdjustScroll(-0.1f),
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+            UIWidgets.Button(panel, "+", new Vector2(56f, 44f), new Vector2(230f, -90f), () => AdjustScroll(0.1f),
+                SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
+
             m_StatusLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
-                SheetTheme.InkSoft, new Vector2(800f, 50f), new Vector2(0f, -125f));
+                SheetTheme.InkSoft, new Vector2(800f, 40f), new Vector2(0f, -140f));
 
             m_RewardLabel = UIWidgets.Label(panel, string.Empty, 24, TextAnchor.MiddleCenter,
-                SheetTheme.Ink, new Vector2(400f, 40f), new Vector2(0f, -185f));
-            UIWidgets.Button(panel, "-", new Vector2(56f, 44f), new Vector2(-230f, -185f), () => AdjustReward(-1),
+                SheetTheme.Ink, new Vector2(400f, 40f), new Vector2(0f, -200f));
+            UIWidgets.Button(panel, "-", new Vector2(56f, 44f), new Vector2(-230f, -200f), () => AdjustReward(-1),
                 SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
-            UIWidgets.Button(panel, "+", new Vector2(56f, 44f), new Vector2(230f, -185f), () => AdjustReward(1),
+            UIWidgets.Button(panel, "+", new Vector2(56f, 44f), new Vector2(230f, -200f), () => AdjustReward(1),
                 SheetTheme.ParchmentDark, SheetTheme.Ink, 24);
 
-            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -255f), Close,
+            UIWidgets.Button(panel, "关闭", new Vector2(200f, 58f), new Vector2(0f, -330f), Close,
                 SheetTheme.Ink, SheetTheme.Parchment, 24);
+        }
+
+        private void ToggleDifficulty()
+        {
+            GameSettings.Difficulty = GameSettings.Difficulty == Difficulty.Hard
+                ? Difficulty.Normal
+                : Difficulty.Hard;
+            RefreshDifficulty();
+        }
+
+        private void RefreshDifficulty()
+        {
+            if (m_DifficultyLabel != null)
+            {
+                m_DifficultyLabel.text = "难度：" + (GameSettings.Difficulty == Difficulty.Hard ? "困难" : "普通");
+            }
+        }
+
+        private void AdjustScroll(float delta)
+        {
+            GameSettings.ScrollSpeed = GameSettings.ScrollSpeed + delta;
+            RefreshScroll();
+        }
+
+        private void RefreshScroll()
+        {
+            if (m_ScrollLabel != null)
+            {
+                m_ScrollLabel.text = "下落速度 " + GameSettings.ScrollSpeed.ToString("0.0") + "x";
+            }
         }
 
         private void AdjustReward(int delta)
