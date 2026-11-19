@@ -139,6 +139,7 @@ namespace CardRhythm.EditorAutomation
                 CheckUIForms(checks);
                 CheckCards(checks);
                 CheckCharts(checks);
+                CheckAssetScripts(checks);
             }
             catch (Exception exception)
             {
@@ -239,6 +240,50 @@ namespace CardRhythm.EditorAutomation
             {
                 AddCheck(checks, "cards", "FAIL", string.Join(" | ", errors));
             }
+        }
+
+        private static void CheckAssetScripts(List<Check> checks)
+        {
+            var known = new HashSet<string>();
+            foreach (string meta in Directory.GetFiles("Assets", "*.cs.meta", SearchOption.AllDirectories))
+            {
+                foreach (string line in File.ReadLines(meta))
+                {
+                    if (line.StartsWith("guid: "))
+                    {
+                        known.Add(line.Substring(6).Trim());
+                        break;
+                    }
+                }
+            }
+
+            var bad = new List<string>();
+            foreach (string path in Directory.GetFiles("Assets/GameMain", "*.asset", SearchOption.AllDirectories))
+            {
+                const string marker = "m_Script: {fileID: 11500000, guid: ";
+                foreach (string line in File.ReadLines(path))
+                {
+                    if (!line.StartsWith(marker))
+                    {
+                        continue;
+                    }
+
+                    int end = line.IndexOf(',', marker.Length);
+                    if (end > marker.Length)
+                    {
+                        string guid = line.Substring(marker.Length, end - marker.Length);
+                        if (!known.Contains(guid))
+                        {
+                            bad.Add(path.Replace('\\', '/') + " -> " + guid);
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+            AddCheck(checks, "asset-scripts", bad.Count == 0 ? "PASS" : "FAIL",
+                bad.Count == 0 ? "ok" : string.Join(" | ", bad.ToArray()));
         }
 
         private static void CheckCharts(List<Check> checks)
