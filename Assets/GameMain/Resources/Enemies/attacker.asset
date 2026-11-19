@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Id: attacker
   m_DisplayName: "\u8BAD\u7EC3\u6728\u6869"
-  m_MaxHp: 10
+  m_MaxHp: 100
   m_Attack: 10
   m_NonPerfectPerAttack: 2
   m_Behavior: 0

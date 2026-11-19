@@ -15,7 +15,7 @@ MonoBehaviour:
   m_Id: chart_attacker
   m_EnemyId: attacker
   m_Bpm: 120
-  m_Bars: 16
+  m_Bars: 17
   m_Notes:
   - Bar: 0
     Slot: 0
@@ -82,178 +82,178 @@ MonoBehaviour:
     Lane: 3
     SlotId: 
     LengthSlots: 0
+  - Bar: 5
+    Slot: 0
+    Lane: 2
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 2
+    Lane: 1
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 4
+    Lane: 3
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 5
+    Slot: 6
+    Lane: 0
+    SlotId: S3
+    LengthSlots: 0
+  - Bar: 6
+    Slot: 0
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 6
+    Slot: 4
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 0
+    Lane: 1
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 2
+    Lane: 3
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 4
+    Lane: 0
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 7
+    Slot: 6
+    Lane: 2
+    SlotId: S4
+    LengthSlots: 0
+  - Bar: 8
+    Slot: 0
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 8
+    Slot: 4
+    Lane: 1
+    SlotId: 
+    LengthSlots: 4
+  - Bar: 9
+    Slot: 0
+    Lane: 3
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 2
+    Lane: 0
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 4
+    Lane: 2
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 9
+    Slot: 6
+    Lane: 1
+    SlotId: S5
+    LengthSlots: 0
+  - Bar: 10
+    Slot: 0
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 10
+    Slot: 4
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 0
+    Lane: 0
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 2
+    Lane: 2
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 4
+    Lane: 1
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 11
+    Slot: 6
+    Lane: 3
+    SlotId: S6
+    LengthSlots: 0
+  - Bar: 12
+    Slot: 0
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 12
+    Slot: 4
+    Lane: 1
+    SlotId: 
+    LengthSlots: 4
+  - Bar: 13
+    Slot: 0
+    Lane: 2
+    SlotId: S7
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 2
+    Lane: 1
+    SlotId: S7
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 4
+    Lane: 3
+    SlotId: S7
+    LengthSlots: 0
+  - Bar: 13
+    Slot: 6
+    Lane: 0
+    SlotId: S7
+    LengthSlots: 0
+  - Bar: 14
+    Slot: 0
+    Lane: 1
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 14
+    Slot: 4
+    Lane: 3
+    SlotId: 
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 0
+    Lane: 1
+    SlotId: S8
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 2
+    Lane: 3
+    SlotId: S8
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 4
+    Lane: 0
+    SlotId: S8
+    LengthSlots: 0
+  - Bar: 15
+    Slot: 6
+    Lane: 2
+    SlotId: S8
+    LengthSlots: 0
   - Bar: 4
     Slot: 4
     Lane: 1
     SlotId: 
-    LengthSlots: 4
-  - Bar: 5
-    Slot: 0
-    Lane: 2
-    SlotId: S3
-    LengthSlots: 0
-  - Bar: 5
-    Slot: 2
-    Lane: 1
-    SlotId: S3
-    LengthSlots: 0
-  - Bar: 5
-    Slot: 4
-    Lane: 3
-    SlotId: S3
-    LengthSlots: 0
-  - Bar: 5
-    Slot: 6
-    Lane: 0
-    SlotId: S3
-    LengthSlots: 0
-  - Bar: 6
-    Slot: 0
-    Lane: 1
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 6
-    Slot: 4
-    Lane: 3
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 7
-    Slot: 0
-    Lane: 1
-    SlotId: S4
-    LengthSlots: 0
-  - Bar: 7
-    Slot: 2
-    Lane: 3
-    SlotId: S4
-    LengthSlots: 0
-  - Bar: 7
-    Slot: 4
-    Lane: 0
-    SlotId: S4
-    LengthSlots: 0
-  - Bar: 7
-    Slot: 6
-    Lane: 2
-    SlotId: S4
-    LengthSlots: 0
-  - Bar: 8
-    Slot: 0
-    Lane: 3
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 8
-    Slot: 4
-    Lane: 1
-    SlotId: 
-    LengthSlots: 4
-  - Bar: 9
-    Slot: 0
-    Lane: 3
-    SlotId: S5
-    LengthSlots: 0
-  - Bar: 9
-    Slot: 2
-    Lane: 0
-    SlotId: S5
-    LengthSlots: 0
-  - Bar: 9
-    Slot: 4
-    Lane: 2
-    SlotId: S5
-    LengthSlots: 0
-  - Bar: 9
-    Slot: 6
-    Lane: 1
-    SlotId: S5
-    LengthSlots: 0
-  - Bar: 10
-    Slot: 0
-    Lane: 1
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 10
-    Slot: 4
-    Lane: 3
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 11
-    Slot: 0
-    Lane: 0
-    SlotId: S6
-    LengthSlots: 0
-  - Bar: 11
-    Slot: 2
-    Lane: 2
-    SlotId: S6
-    LengthSlots: 0
-  - Bar: 11
-    Slot: 4
-    Lane: 1
-    SlotId: S6
-    LengthSlots: 0
-  - Bar: 11
-    Slot: 6
-    Lane: 3
-    SlotId: S6
-    LengthSlots: 0
-  - Bar: 12
-    Slot: 0
-    Lane: 3
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 12
-    Slot: 4
-    Lane: 1
-    SlotId: 
-    LengthSlots: 4
-  - Bar: 13
-    Slot: 0
-    Lane: 2
-    SlotId: S7
-    LengthSlots: 0
-  - Bar: 13
-    Slot: 2
-    Lane: 1
-    SlotId: S7
-    LengthSlots: 0
-  - Bar: 13
-    Slot: 4
-    Lane: 3
-    SlotId: S7
-    LengthSlots: 0
-  - Bar: 13
-    Slot: 6
-    Lane: 0
-    SlotId: S7
-    LengthSlots: 0
-  - Bar: 14
-    Slot: 0
-    Lane: 1
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 14
-    Slot: 4
-    Lane: 3
-    SlotId: 
-    LengthSlots: 0
-  - Bar: 15
-    Slot: 0
-    Lane: 1
-    SlotId: S8
-    LengthSlots: 0
-  - Bar: 15
-    Slot: 2
-    Lane: 3
-    SlotId: S8
-    LengthSlots: 0
-  - Bar: 15
-    Slot: 4
-    Lane: 0
-    SlotId: S8
-    LengthSlots: 0
-  - Bar: 15
-    Slot: 6
-    Lane: 2
-    SlotId: S8
     LengthSlots: 0

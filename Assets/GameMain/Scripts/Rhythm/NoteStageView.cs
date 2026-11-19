@@ -37,6 +37,7 @@ namespace CardRhythm.Rhythm
         };
 
         private readonly List<Image> m_NoteViews = new List<Image>();
+        private readonly List<RectTransform> m_HoldBodies = new List<RectTransform>();
         private readonly List<Image> m_KeyCaps = new List<Image>();
         private readonly List<Text> m_KeyLabels = new List<Text>();
         private readonly List<JudgementPopup> m_Popups = new List<JudgementPopup>();
@@ -165,6 +166,12 @@ namespace CardRhythm.Rhythm
                 color.a = 0.95f;
                 image.color = color;
                 image.raycastTarget = false;
+                image.sprite = SheetTheme.ButtonFrame;
+                if (image.sprite != null)
+                {
+                    image.type = Image.Type.Sliced;
+                }
+
                 m_NoteViews.Add(image);
 
                 if (!string.IsNullOrEmpty(note.BuffId))
@@ -172,19 +179,42 @@ namespace CardRhythm.Rhythm
                     ApplyBuffIcon(noteRect, image, note.BuffId);
                 }
 
+                RectTransform holdBody = null;
                 if (note.Type == NoteType.Hold && note.Duration > 0f)
                 {
                     float bodyHeight = note.Duration / m_TravelSeconds * (ReferenceHeight - JudgeLineY);
-                    var body = CreateRect(noteRect, "HoldBody");
-                    body.anchorMin = new Vector2(0.5f, 0.5f);
-                    body.anchorMax = new Vector2(0.5f, 0.5f);
-                    body.sizeDelta = new Vector2(NoteWidth * 0.55f, bodyHeight);
-                    body.anchoredPosition = new Vector2(0f, bodyHeight * 0.5f);
+                    holdBody = CreateRect(noteRect, "HoldBody");
+                    holdBody.anchorMin = new Vector2(0.5f, 0.5f);
+                    holdBody.anchorMax = new Vector2(0.5f, 0.5f);
+                    holdBody.sizeDelta = new Vector2(NoteWidth * 0.6f, bodyHeight);
+                    holdBody.anchoredPosition = new Vector2(0f, bodyHeight * 0.5f);
 
-                    var bodyImage = body.gameObject.AddComponent<Image>();
-                    bodyImage.color = new Color(color.r, color.g, color.b, 0.35f);
+                    var bodyImage = holdBody.gameObject.AddComponent<Image>();
+                    bodyImage.color = new Color(color.r, color.g, color.b, 0.22f);
                     bodyImage.raycastTarget = false;
+
+                    var core = CreateRect(holdBody, "Core");
+                    core.anchorMin = new Vector2(0.5f, 0f);
+                    core.anchorMax = new Vector2(0.5f, 1f);
+                    core.pivot = new Vector2(0.5f, 0.5f);
+                    core.sizeDelta = new Vector2(NoteWidth * 0.18f, 0f);
+                    core.anchoredPosition = Vector2.zero;
+                    var coreImage = core.gameObject.AddComponent<Image>();
+                    coreImage.color = new Color(1f, 1f, 1f, 0.45f);
+                    coreImage.raycastTarget = false;
+
+                    var tail = CreateRect(holdBody, "Tail");
+                    tail.anchorMin = new Vector2(0.5f, 1f);
+                    tail.anchorMax = new Vector2(0.5f, 1f);
+                    tail.pivot = new Vector2(0.5f, 0.5f);
+                    tail.sizeDelta = new Vector2(NoteWidth * 0.95f, 5f);
+                    tail.anchoredPosition = Vector2.zero;
+                    var tailImage = tail.gameObject.AddComponent<Image>();
+                    tailImage.color = new Color(1f, 1f, 1f, 0.9f);
+                    tailImage.raycastTarget = false;
                 }
+
+                m_HoldBodies.Add(holdBody);
             }
 
             BuildPopupPool();
@@ -584,9 +614,23 @@ namespace CardRhythm.Rhythm
             {
                 NoteData note = m_Chart.Notes[i];
                 Image view = m_NoteViews[i];
+                RectTransform holdBody = m_HoldBodies.Count > i ? m_HoldBodies[i] : null;
                 float remaining = note.Time - songTime;
                 float y = JudgeLineY + remaining / m_TravelSeconds * (ReferenceHeight - JudgeLineY);
-                bool visible = remaining > -0.35f && remaining < m_TravelSeconds + 0.5f;
+
+                bool holding = false;
+                if (holdBody != null && songTime >= note.Time && songTime < note.EndTime
+                    && InputKeys.LaneHeld(note.Lane))
+                {
+                    holding = true;
+                    y = JudgeLineY;
+                    float tailRemaining = note.EndTime - songTime;
+                    float bodyHeight = Mathf.Max(0f, tailRemaining / m_TravelSeconds * (ReferenceHeight - JudgeLineY));
+                    holdBody.sizeDelta = new Vector2(holdBody.sizeDelta.x, bodyHeight);
+                    holdBody.anchoredPosition = new Vector2(0f, bodyHeight * 0.5f);
+                }
+
+                bool visible = (remaining > -0.35f || holding) && remaining < m_TravelSeconds + 0.5f;
 
                 if (view.gameObject.activeSelf != visible)
                 {
